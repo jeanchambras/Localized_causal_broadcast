@@ -1,18 +1,8 @@
 import java.io.*;
+import java.net.*;
 
 public class Da_proc {
-
-    private static class Process {
-        int processId;
-        String processIP;
-        int processReceivePort;
-
-        public Process(int processId, String processIP, int processReceivePort) {
-            this.processId = processId;
-            this.processIP = processIP;
-            this.processReceivePort = processReceivePort;
-        }
-    }
+    // parse membership file
     public static void main(String[] args) {
 
         String thisLine = null;
@@ -30,7 +20,6 @@ public class Da_proc {
             int numberProc = 0;
             if((thisLine = br.readLine()) != null) {
                 numberProc = Integer.parseInt(thisLine);
-                System.out.println(numberProc);
             }
 
             int i =0;
