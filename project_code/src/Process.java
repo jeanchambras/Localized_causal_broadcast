@@ -9,6 +9,11 @@ public class Process{
     private Thread receiveInterface;
     private ArrayList<String> receivedMessages;
 
+    /**
+     * This method is used to parse a string into an InetAddress
+     * @param ip the ip address as a String
+     * @return the ip address as an InetAddress of the process
+     */
     private InetAddress parseAddress(String ip){
         InetAddress address = null;
         try {
@@ -19,6 +24,33 @@ public class Process{
         return address;
     }
 
+    /**
+     * @return the id of the process
+     */
+    public int getProcessId() {
+        return processId;
+    }
+
+    /**
+     * @return the ip address of the process
+     */
+    public InetAddress getProcessIP() {
+        return processIP;
+    }
+
+    /**
+     * @return the port number of the process
+     */
+    public int getProcessReceivePort() {
+        return processReceivePort;
+    }
+
+    /**
+     * Constructor of the process
+     * @param processId The ID of the process
+     * @param processIP The IP address of the process
+     * @param processReceivePort The port number the process is listening for incoming packets
+    * */
     public Process(int processId, String processIP, int processReceivePort) {
         this.processId = processId;
         this.processIP = parseAddress(processIP);
@@ -28,22 +60,17 @@ public class Process{
         this.receiveInterface.start();
     }
 
-    public int getProcessId() {
-        return processId;
-    }
-
-    public InetAddress getProcessIP() {
-        return processIP;
-    }
-
-    public int getProcessReceivePort() {
-        return processReceivePort;
-    }
-
+    /**
+     * This method makes a process send a message to another process
+     * @param msg The message we want the process to send
+     * @param dstAddress The destination ip addess
+     * @param dstPort The destination port number
+     */
     public void sendMessage(String msg, String dstAddress, int dstPort){
         new Thread(new Runnable() {
             public void run() {
                 try {
+                    // We initialize the sending socket in another thread not to block the main loop of the process
                     StubbornLinkSend sendingInterface = new StubbornLinkSend(parseAddress(dstAddress), dstPort);
                     sendingInterface.sendMessage(msg);
                 } catch (IOException e) {
