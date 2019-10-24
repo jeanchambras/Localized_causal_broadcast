@@ -35,7 +35,7 @@ public class StubbornLinkServer implements Runnable {
                     String received = new String(packet.getData(), 0, packet.getLength());
 
                     if(!receivedMessages.contains(received)) {
-                        System.out.println("packet from :" + received);
+                        System.out.println(receivePort + " : packet from :" + received);
                         receivedMessages.add(received);
                     }
                     if (received.equals("end")) {
