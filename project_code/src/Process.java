@@ -1,12 +1,13 @@
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
 
 public class Process{
     private int processId;
     private InetAddress processIP;
     private int processReceivePort;
     private Thread receiveInterface;
-
+    private ArrayList<String> receivedMessages;
 
     private InetAddress parseAddress(String ip){
         InetAddress address = null;
@@ -22,7 +23,8 @@ public class Process{
         this.processId = processId;
         this.processIP = parseAddress(processIP);
         this.processReceivePort = processReceivePort;
-        this.receiveInterface = new Thread(new StubbornLinkServer(processReceivePort));
+        this.receivedMessages = new ArrayList<>();
+        this.receiveInterface = new Thread(new StubbornLinkServer(processReceivePort, receivedMessages));
         this.receiveInterface.start();
     }
 
