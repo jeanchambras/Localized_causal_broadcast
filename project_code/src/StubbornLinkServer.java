@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
 
 public class StubbornLinkServer implements Runnable {
 
@@ -7,9 +8,11 @@ public class StubbornLinkServer implements Runnable {
     private int receivePort;
     private boolean running;
     private byte[] buf = new byte[256];
+    private ArrayList<String> receivedMessages;
 
-    public StubbornLinkServer(int processReceivePort){
+    public StubbornLinkServer(int processReceivePort,ArrayList<String> receivedMessages ){
         this.receivePort = processReceivePort;
+        this.receivedMessages = receivedMessages;
         try {
             socket = new DatagramSocket(processReceivePort);
         } catch (SocketException e) {
@@ -30,8 +33,11 @@ public class StubbornLinkServer implements Runnable {
                     }
 
                     String received = new String(packet.getData(), 0, packet.getLength());
-                    System.out.println("packet from :" + received);
 
+                    if(!receivedMessages.contains(received)) {
+                        System.out.println("packet from :" + received);
+                        receivedMessages.add(received);
+                    }
                     if (received.equals("end")) {
                         running = false;
                         continue;
