@@ -10,6 +10,11 @@ public class StubbornLinkServer implements Runnable {
     private byte[] buf = new byte[256];
     private ArrayList<String> receivedMessages;
 
+    /**
+     * Instantiate the UDP socket
+     * @param processReceivePort port number to listen
+     * @param receivedMessages Array of all messages delivered by the process
+     */
     public StubbornLinkServer(int processReceivePort,ArrayList<String> receivedMessages ){
         this.receivePort = processReceivePort;
         this.receivedMessages = receivedMessages;
@@ -19,6 +24,10 @@ public class StubbornLinkServer implements Runnable {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Start the process UDP server
+     */
     @Override
     public void run() {
         running = true;

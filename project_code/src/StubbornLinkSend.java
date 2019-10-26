@@ -8,6 +8,12 @@ public class StubbornLinkSend {
     private byte[] buf;
     private boolean sending;
 
+    /**
+     * Initiate a stubborn link sending socket
+     * @param address ip address of the destination process
+     * @param port port number of the destination process
+     * @throws SocketException
+     */
     public StubbornLinkSend(InetAddress address, int port) throws SocketException {
         System.out.println("Sender is running");
         socket = new DatagramSocket();
@@ -15,6 +21,11 @@ public class StubbornLinkSend {
         this.address = address;
     }
 
+    /**
+     * Start to send the message
+     * @param msg message to send
+     * @throws IOException
+     */
     public void sendMessage(String msg) throws IOException {
         sending = true;
         while(sending){
@@ -28,9 +39,5 @@ public class StubbornLinkSend {
                 e.printStackTrace();
             }
         }
-    }
-
-    public void close() {
-        socket.close();
     }
 }
