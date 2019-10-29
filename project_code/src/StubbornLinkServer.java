@@ -8,16 +8,17 @@ public class StubbornLinkServer implements Runnable {
     private int receivePort;
     private boolean running;
     private byte[] buf = new byte[256];
-    private Set<String> receivedMessages;
 
+
+    public int getReceivePort() {
+        return receivePort;
+    }
     /**
      * Instantiate the UDP socket
      * @param processReceivePort port number to listen
-     * @param receivedMessages Array of all messages delivered by the process
      */
-    public StubbornLinkServer(int processReceivePort,Set<String> receivedMessages ){
+    public StubbornLinkServer(int processReceivePort){
         this.receivePort = processReceivePort;
-        this.receivedMessages = receivedMessages;
         try {
             socket = new DatagramSocket(processReceivePort);
         } catch (SocketException e) {
@@ -40,18 +41,18 @@ public class StubbornLinkServer implements Runnable {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
                     String received = new String(packet.getData(), 0, packet.getLength());
-
-                    if(!receivedMessages.contains(received)) {
-                        System.out.println(receivePort + " : packet from :" + received);
-                        receivedMessages.add(received);
-                    }
+                    deliver(received);
                     if (received.equals("end")) {
                         running = false;
                         continue;
                     }
                 }
                 socket.close();
+    }
+
+
+    public void deliver(String received) {
+        System.out.println("On port : " + receivePort + ", packet received : " + received);
     }
 }

@@ -8,6 +8,8 @@ public class Process{
     private int processReceivePort;
     private Thread receiveInterface;
     private Set<String> receivedMessages;
+    private int timeout;
+    private Set<Tuple<Process, String>> messagesToSend;
 
     /**
      * This method is used to parse a string into an InetAddress
@@ -51,32 +53,40 @@ public class Process{
      * @param processIP The IP address of the process
      * @param processReceivePort The port number the process is listening for incoming packets
     * */
-    public Process(int processId, String processIP, int processReceivePort) {
+    public Process(int processId, String processIP, int processReceivePort, int timeout) {
         this.processId = processId;
         this.processIP = parseAddress(processIP);
         this.processReceivePort = processReceivePort;
         this.receivedMessages = new HashSet<>();
-        this.receiveInterface = new Thread(new StubbornLinkServer(processReceivePort, receivedMessages));
+        this.receiveInterface = new Thread(new PerfectLinkServer(processReceivePort, receivedMessages));
         this.receiveInterface.start();
+        this.timeout = timeout;
     }
 
     /**
-     * This method makes a process send a message to another process
-     * @param msg The message we want the process to send
-     * @param dstAddress The destination ip addess
-     * @param dstPort The destination port number
+     * The process start to send messages
+     * @param messagesToSend list of messages to send
      */
-    public void sendMessage(String msg, String dstAddress, int dstPort){
+    public void sendMessages(Set<Tuple<Process, String>> messagesToSend){
+        this.messagesToSend = messagesToSend;
         new Thread(new Runnable() {
             public void run() {
                 try {
                     // We initialize the sending socket in another thread not to block the main loop of the process
-                    StubbornLinkSend sendingInterface = new StubbornLinkSend(parseAddress(dstAddress), dstPort);
-                    sendingInterface.sendMessage(msg);
+                    PerfectLinkSender sendingInterface = new PerfectLinkSender(timeout);
+                    sendingInterface.sendMessage(messagesToSend);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }).start();
+    }
+
+    /**
+     * Add messages to send by perfect link sender
+     * @param messagesToAdd
+     */
+    public void addMessages(Set<Tuple<Process, String>> messagesToAdd) {
+        messagesToSend.addAll(messagesToAdd);
     }
 }
