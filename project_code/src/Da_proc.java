@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 public class Da_proc {
     // parse membership file
@@ -23,16 +24,14 @@ public class Da_proc {
             }
 
             int i =0;
-            Process[] processes = new Process[numberProc];
+            HashSet<Process> processes = new HashSet<>();
             while ((thisLine = br.readLine()) != null) {
                 String[] process_details = thisLine.split("\\s+");
-                processes[i] = new Process(Integer.parseInt(process_details[0]),process_details[1],Integer.parseInt(process_details[2]));
+                processes.add(new Process(Integer.parseInt(process_details[0]),process_details[1],Integer.parseInt(process_details[2])));
             }
         } catch(Exception e) {
             e.printStackTrace();
         }
-
-
     }
 }
 

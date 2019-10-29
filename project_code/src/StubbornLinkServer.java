@@ -1,6 +1,6 @@
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
+import java.util.*;
 
 public class StubbornLinkServer implements Runnable {
 
@@ -8,14 +8,14 @@ public class StubbornLinkServer implements Runnable {
     private int receivePort;
     private boolean running;
     private byte[] buf = new byte[256];
-    private ArrayList<String> receivedMessages;
+    private Set<String> receivedMessages;
 
     /**
      * Instantiate the UDP socket
      * @param processReceivePort port number to listen
      * @param receivedMessages Array of all messages delivered by the process
      */
-    public StubbornLinkServer(int processReceivePort,ArrayList<String> receivedMessages ){
+    public StubbornLinkServer(int processReceivePort,Set<String> receivedMessages ){
         this.receivePort = processReceivePort;
         this.receivedMessages = receivedMessages;
         try {

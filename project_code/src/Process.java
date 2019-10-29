@@ -1,13 +1,13 @@
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
+import java.util.*;
 
 public class Process{
     private int processId;
     private InetAddress processIP;
     private int processReceivePort;
     private Thread receiveInterface;
-    private ArrayList<String> receivedMessages;
+    private Set<String> receivedMessages;
 
     /**
      * This method is used to parse a string into an InetAddress
@@ -55,7 +55,7 @@ public class Process{
         this.processId = processId;
         this.processIP = parseAddress(processIP);
         this.processReceivePort = processReceivePort;
-        this.receivedMessages = new ArrayList<>();
+        this.receivedMessages = new HashSet<>();
         this.receiveInterface = new Thread(new StubbornLinkServer(processReceivePort, receivedMessages));
         this.receiveInterface.start();
     }
