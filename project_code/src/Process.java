@@ -5,12 +5,10 @@ public class Process{
     private int processId;
     private InetAddress processIP;
     private int processReceivePort;
-    private Thread receiveInterface;
-    private Set<String> receivedMessages;
-    private int timeout;
-    private Set<Tuple<ProcessInformations, String>> messagesToSend;
-    private DatagramSocket socket;
+    private DatagramSocket UDPinterface;
+    private ArrayList<Tuple<ProcessDetails, String>> perfectLinkDeliveredMessages;
     private NetworkTopology network;
+    private PerfectLink perfectLink;
 
     /**
      * This method is used to parse a string into an InetAddress
@@ -54,38 +52,21 @@ public class Process{
      * @param processIP The IP address of the process
      * @param processReceivePort The port number the process is listening for incoming packets
     * */
-    public Process(int processId, String processIP, int processReceivePort, int timeout, ArrayList<ProcessInformations> processesInNetwork) throws SocketException {
+    public Process(int processId, String processIP, int processReceivePort, ArrayList<ProcessDetails> processesInNetwork) throws SocketException {
         this.processId = processId;
         this.processIP = parseAddress(processIP);
         this.processReceivePort = processReceivePort;
-        this.socket = new DatagramSocket(processReceivePort);
-        this.receivedMessages = new HashSet<>();
-        this.timeout = timeout;
         this.network = new NetworkTopology(processesInNetwork);
-        this.receiveInterface = new Thread(new PerfectLinkServer(processReceivePort, receivedMessages, socket, network));
-        this.receiveInterface.start();
+        this.UDPinterface = new DatagramSocket(processReceivePort);
+        this.perfectLinkDeliveredMessages = new ArrayList<>();
+        this.perfectLink = new PerfectLink(UDPinterface, network, perfectLinkDeliveredMessages);
     }
 
-    /**
-     * The process start to send messages
-     * @param messagesToSend list of messages to send
-     */
-    public void sendMessages(Set<Tuple<ProcessInformations, String>> messagesToSend){
-        this.messagesToSend = messagesToSend;
-        new Thread(new Runnable() {
-            public void run() {
-                    // We initialize the sending socket in another thread not to block the main loop of the process
-                    PerfectLinkSender sendingInterface = new PerfectLinkSender(timeout, socket);
-                    sendingInterface.sendMessage(messagesToSend);
-            }
-        }).start();
+    public void addMessagesToQueue(ArrayList<Tuple<ProcessDetails, String>> messagesToAdd) {
+        perfectLink.addMessagesToQueue(messagesToAdd);
     }
 
-    /**
-     * Add messages to send by perfect link sender
-     * @param messagesToAdd
-     */
-    public void addMessages(Set<Tuple<ProcessInformations, String>> messagesToAdd) {
-        messagesToSend.addAll(messagesToAdd);
+    public void startClient(){
+        perfectLink.sendMessages();
     }
 }

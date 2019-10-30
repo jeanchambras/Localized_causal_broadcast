@@ -2,13 +2,13 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Set;
 
-public class ProcessInformations {
+public class ProcessDetails {
     private InetAddress address;
     private int port;
     private int id;
 
 
-    public ProcessInformations(int id, String address, int port) throws UnknownHostException {
+    public ProcessDetails(int id, String address, int port) throws UnknownHostException {
         this.address = InetAddress.getByName(address);
         this.port = port;
         this.id = id;
