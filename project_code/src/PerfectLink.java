@@ -12,12 +12,17 @@ public class PerfectLink {
     private DatagramSocket socket;
     private int timeout;
 
-    public PerfectLink(DatagramSocket socket, NetworkTopology networkTopology, ArrayList<Tuple<ProcessDetails,String>> perfectLinkDeliveredMessages){
-        this.perfectLinkDeliveredMessages = perfectLinkDeliveredMessages;
+
+    public ArrayList<Tuple<ProcessDetails, String>> getPerfectLinkDeliveredMessages() {
+        return perfectLinkDeliveredMessages;
+    }
+
+    public PerfectLink(DatagramSocket socket, NetworkTopology networkTopology){
         this.receivedMessages = new ArrayList<>();
         this.networkTopology = networkTopology;
         this.socket = socket;
         this.timeout = 300;
+        this.perfectLinkDeliveredMessages = new ArrayList<>();
         this.messagesToSend = new ArrayList<>();
         this.messagesToAdd = new ArrayList<>();
 

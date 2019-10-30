@@ -6,7 +6,6 @@ public class Process{
     private InetAddress processIP;
     private int processReceivePort;
     private DatagramSocket UDPinterface;
-    private ArrayList<Tuple<ProcessDetails, String>> perfectLinkDeliveredMessages;
     private NetworkTopology network;
     private PerfectLink perfectLink;
 
@@ -39,6 +38,7 @@ public class Process{
         return processIP;
     }
 
+
     /**
      * @return the port number of the process
      */
@@ -58,8 +58,7 @@ public class Process{
         this.processReceivePort = processReceivePort;
         this.network = new NetworkTopology(processesInNetwork);
         this.UDPinterface = new DatagramSocket(processReceivePort);
-        this.perfectLinkDeliveredMessages = new ArrayList<>();
-        this.perfectLink = new PerfectLink(UDPinterface, network, perfectLinkDeliveredMessages);
+        this.perfectLink = new PerfectLink(UDPinterface, network);
     }
 
     public void addMessagesToQueue(ArrayList<Tuple<ProcessDetails, String>> messagesToAdd) {
