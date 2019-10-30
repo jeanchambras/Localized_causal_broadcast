@@ -17,7 +17,8 @@ public class MainTmp {
 
 		ArrayList<Tuple<ProcessDetails, String>> messagesToSendByProc1 = new ArrayList<Tuple<ProcessDetails, String>>(Arrays.asList(
 				new Tuple<>(initalProcessInNetwork.get(1), "1"),
-				new Tuple<>(initalProcessInNetwork.get(1), "2")
+				new Tuple<>(initalProcessInNetwork.get(0), "2"),
+				new Tuple<>(initalProcessInNetwork.get(1), "3")
 
 
 		));

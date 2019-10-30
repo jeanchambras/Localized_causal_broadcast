@@ -94,9 +94,11 @@ public class PerfectLink {
 
     public void deliver(String received, int sourcePort) {
         ProcessDetails source = networkTopology.getProcessFromPort(sourcePort);
-        System.out.println(received + " from " + source.getId());
         perfectLinkDeliveredMessages.add(new Tuple<>(source, received));
-        addMessagesToQueue(new ArrayList<>(Arrays.asList(new Tuple<>(source, received))));
+
+        // TODO remove -> just for debugging
+        ProcessDetails destination = networkTopology.getProcessFromPort(socket.getLocalPort());
+        System.out.println("from process " + source.getId() + " to process " + destination.getId() + " delivered message "+ received );
     }
 
 }
