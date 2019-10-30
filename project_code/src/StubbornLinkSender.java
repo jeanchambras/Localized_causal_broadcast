@@ -15,9 +15,9 @@ public class StubbornLinkSender {
      * @param timeout timeout between messages sent
      * @throws SocketException
      */
-    public StubbornLinkSender(int timeout) throws SocketException {
+    public StubbornLinkSender(int timeout, DatagramSocket socket){
         System.out.println("Sender is running");
-        socket = new DatagramSocket();
+        this.socket = socket;
         this.timeout = timeout;
     }
 

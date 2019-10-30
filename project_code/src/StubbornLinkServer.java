@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.net.*;
-import java.util.*;
 
 public class StubbornLinkServer implements Runnable {
 
@@ -17,13 +16,9 @@ public class StubbornLinkServer implements Runnable {
      * Instantiate the UDP socket
      * @param processReceivePort port number to listen
      */
-    public StubbornLinkServer(int processReceivePort){
+    public StubbornLinkServer(int processReceivePort, DatagramSocket socket){
         this.receivePort = processReceivePort;
-        try {
-            socket = new DatagramSocket(processReceivePort);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
+        this.socket = socket;
     }
 
     /**
@@ -42,7 +37,7 @@ public class StubbornLinkServer implements Runnable {
                         e.printStackTrace();
                     }
                     String received = new String(packet.getData(), 0, packet.getLength());
-                    deliver(received);
+                    deliver(received, packet.getPort());
                     if (received.equals("end")) {
                         running = false;
                         continue;
@@ -52,7 +47,7 @@ public class StubbornLinkServer implements Runnable {
     }
 
 
-    public void deliver(String received) {
+    public void deliver(String received, int sourcePort) {
         System.out.println("On port : " + receivePort + ", packet received : " + received);
     }
 }

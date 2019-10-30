@@ -1,3 +1,4 @@
+import java.net.DatagramSocket;
 import java.util.*;
 
 public class PerfectLinkServer extends StubbornLinkServer {
@@ -8,8 +9,8 @@ public class PerfectLinkServer extends StubbornLinkServer {
      * @param processReceivePort port number to listen
      * @param receivedMessages   Array of all messages delivered by the process
      */
-    public PerfectLinkServer(int processReceivePort, Set<String> receivedMessages) {
-        super(processReceivePort);
+    public PerfectLinkServer(int processReceivePort, Set<String> receivedMessages, DatagramSocket socket) {
+        super(processReceivePort,socket);
         this.receivedMessages = receivedMessages;
     }
 
@@ -18,10 +19,10 @@ public class PerfectLinkServer extends StubbornLinkServer {
      * @param received
      */
     @Override
-    public void deliver(String received) {
+    public void deliver(String received, int sourcePort) {
         if(!receivedMessages.contains(received)){
             receivedMessages.add(received);
-            System.out.println("On port : " + this.getReceivePort() + ", packet received : " + received);
+            System.out.println("On port : " + this.getReceivePort() + ", packet received : " + received + ", from : " + sourcePort);
         }
     }
 }

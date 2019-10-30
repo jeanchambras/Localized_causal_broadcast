@@ -10,6 +10,7 @@ public class Process{
     private Set<String> receivedMessages;
     private int timeout;
     private Set<Tuple<Process, String>> messagesToSend;
+    private DatagramSocket socket;
 
     /**
      * This method is used to parse a string into an InetAddress
@@ -53,14 +54,15 @@ public class Process{
      * @param processIP The IP address of the process
      * @param processReceivePort The port number the process is listening for incoming packets
     * */
-    public Process(int processId, String processIP, int processReceivePort, int timeout) {
+    public Process(int processId, String processIP, int processReceivePort, int timeout) throws SocketException {
         this.processId = processId;
         this.processIP = parseAddress(processIP);
         this.processReceivePort = processReceivePort;
+        this.socket = new DatagramSocket(processReceivePort);
         this.receivedMessages = new HashSet<>();
-        this.receiveInterface = new Thread(new PerfectLinkServer(processReceivePort, receivedMessages));
-        this.receiveInterface.start();
         this.timeout = timeout;
+        this.receiveInterface = new Thread(new PerfectLinkServer(processReceivePort, receivedMessages, socket));
+        this.receiveInterface.start();
     }
 
     /**
@@ -71,13 +73,9 @@ public class Process{
         this.messagesToSend = messagesToSend;
         new Thread(new Runnable() {
             public void run() {
-                try {
                     // We initialize the sending socket in another thread not to block the main loop of the process
-                    PerfectLinkSender sendingInterface = new PerfectLinkSender(timeout);
+                    PerfectLinkSender sendingInterface = new PerfectLinkSender(timeout, socket);
                     sendingInterface.sendMessage(messagesToSend);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         }).start();
     }
