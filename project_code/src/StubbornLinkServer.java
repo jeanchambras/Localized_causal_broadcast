@@ -7,18 +7,25 @@ public class StubbornLinkServer implements Runnable {
     private int receivePort;
     private boolean running;
     private byte[] buf = new byte[256];
+    private NetworkTopology network;
 
 
     public int getReceivePort() {
         return receivePort;
     }
+
+    public NetworkTopology getNetwork() {
+        return network;
+    }
+
     /**
      * Instantiate the UDP socket
      * @param processReceivePort port number to listen
      */
-    public StubbornLinkServer(int processReceivePort, DatagramSocket socket){
+    public StubbornLinkServer(int processReceivePort, DatagramSocket socket, NetworkTopology network){
         this.receivePort = processReceivePort;
         this.socket = socket;
+        this.network = network;
     }
 
     /**
