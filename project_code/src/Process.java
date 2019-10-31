@@ -60,7 +60,7 @@ public class Process{
     * */
     public Process(int processId, String processIP, int processReceivePort, ArrayList<ProcessDetails> processesInNetwork) throws SocketException {
         this.processId = processId;
-        this.timeout = 2000;
+        this.timeout = 200;
         this.processIP = parseAddress(processIP);
         this.processReceivePort = processReceivePort;
         this.network = new NetworkTopology(processesInNetwork);
