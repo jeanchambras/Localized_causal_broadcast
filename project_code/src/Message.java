@@ -1,10 +1,22 @@
-public class Message {
+import java.io.Serializable;
+
+public class Message implements Serializable {
     private ProcessDetails destination;
+    private ProcessDetails source;
     private String payload;
 
-    public Message(ProcessDetails destination, String payload){
+    public Message(ProcessDetails destination, ProcessDetails source, String payload){
         this.payload = payload;
         this.destination = destination;
+        this.source = source;
+    }
+
+    public String getPayload() {
+        return payload;
+    }
+
+    public ProcessDetails getDestination() {
+        return destination;
     }
 
     @Override
@@ -25,6 +37,6 @@ public class Message {
         Message c = (Message) o;
 
         // Compare the data members and return accordingly
-        return this.destination.equals(c.destination) && this.payload.equals(c.payload);
+        return this.destination.equals(c.destination)&& this.source.equals(c.source) && this.payload.equals(c.payload);
     }
 }

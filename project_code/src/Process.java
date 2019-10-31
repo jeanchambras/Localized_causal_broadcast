@@ -7,8 +7,8 @@ public class Process{
     private int processReceivePort;
     private DatagramSocket UDPinterface;
     private NetworkTopology network;
-    private PerfectLink perfectLink;
     private PerfectFailureDetector failureDetector;
+    private Beb broadcast;
     private final int timeout;
 
     /**
@@ -48,9 +48,6 @@ public class Process{
         return processReceivePort;
     }
 
-    public PerfectLink getPerfectLink() {
-        return perfectLink;
-    }
 
     /**
      * Constructor of the process
@@ -60,21 +57,17 @@ public class Process{
     * */
     public Process(int processId, String processIP, int processReceivePort, ArrayList<ProcessDetails> processesInNetwork) throws SocketException {
         this.processId = processId;
-        this.timeout = 200;
+        this.timeout = 1000;
         this.processIP = parseAddress(processIP);
         this.processReceivePort = processReceivePort;
         this.network = new NetworkTopology(processesInNetwork);
         this.UDPinterface = new DatagramSocket(processReceivePort);
         this.failureDetector = new PerfectFailureDetector(network, timeout);
-        this.perfectLink = new PerfectLink(UDPinterface, network, failureDetector, timeout);
-    }
-
-    public void addMessagesToQueue(ArrayList<Tuple<ProcessDetails, String>> messagesToAdd) {
-        perfectLink.addMessagesToQueue(messagesToAdd);
+        this.broadcast = new Beb(UDPinterface, network, "6",failureDetector,  timeout);
+        startClient();
     }
 
     public void startClient(){
-        perfectLink.sendMessages();
-
+        broadcast.sendMessages();
     }
 }

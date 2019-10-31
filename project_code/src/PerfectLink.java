@@ -1,6 +1,6 @@
 import sun.plugin2.message.HeartbeatMessage;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -8,64 +8,57 @@ import java.net.UnknownHostException;
 import java.util.*;
 
 public class PerfectLink {
-    private ArrayList<Tuple<ProcessDetails, String>> perfectLinkDeliveredMessages;
-    private ArrayList<Tuple<ProcessDetails, String>> messagesToAdd;
-    private ArrayList<String> receivedMessages;
-    private ArrayList<Tuple<ProcessDetails, String>> messagesToSend;
+    private ArrayList<Message> messagesToAdd;
+    private ArrayList<Message> receivedMessages;
+    private ArrayList<Message> messagesToSend;
     private NetworkTopology networkTopology;
     private DatagramSocket socket;
     private Thread server;
     private Thread client;
     private int timeout;
+    private Listener beb;
 
-
-    public ArrayList<Tuple<ProcessDetails, String>> getPerfectLinkDeliveredMessages() {
-        return perfectLinkDeliveredMessages;
-    }
-
-    public ArrayList<Tuple<ProcessDetails, String>> getMessagesToSend() {
+    public ArrayList<Message> getMessagesToSend() {
         return messagesToSend;
     }
 
-    public PerfectLink(DatagramSocket socket, NetworkTopology networkTopology, PerfectFailureDetector failureDetector, int timeout){
+
+    public PerfectLink(DatagramSocket socket, NetworkTopology networkTopology, PerfectFailureDetector failureDetector, int timeout, Listener beb){
         this.receivedMessages = new ArrayList<>();
         this.networkTopology = networkTopology;
         this.socket = socket;
         this.timeout = timeout;
-        this.perfectLinkDeliveredMessages = new ArrayList<>();
         this.messagesToSend = new ArrayList<>();
         this.messagesToAdd = new ArrayList<>();
+        this.beb = beb;
         this.server = new Thread(new Runnable() {
             public void run() {
                 boolean running = true;
                 byte[] buf = new byte[256];
+                Message message = null;
                 while (running) {
                     DatagramPacket packet
                             = new DatagramPacket(buf, buf.length);
                     try {
                         socket.receive(packet);
-                    } catch (IOException e) {
+                        ObjectInputStream iStream;
+                        iStream = new ObjectInputStream(new ByteArrayInputStream(buf));
+                        message = (Message) iStream.readObject();
+                        iStream.close();
+                    } catch (IOException | ClassNotFoundException e) {
                         e.printStackTrace();
                     }
-                    String received = new String(packet.getData(), 0, packet.getLength());
-                    if (received.equals("heartbeat")){
-                        ProcessDetails source = networkTopology.getProcessFromPort(packet.getPort());
-                        failureDetector.getAlive().add(source);
-                    } else if(!receivedMessages.contains(received)){
-                        receivedMessages.add(received);
-                        deliver(received, packet.getPort());
-                    }
-
-                    if (received.equals("end")) {
-                        running = false;
-                        continue;
+                    if(!receivedMessages.contains(message)){
+                        System.out.println(networkTopology.getProcessFromPort(packet.getPort()).getId() + " : " + message.getPayload());
+                        deliver(networkTopology.getProcessFromPort(packet.getPort()),message);
+                        receivedMessages.add(message);
                     }
                 }
                 socket.close();
             }
         });
         server.start();
-        initializeHeartbeats(networkTopology.getProcessesInNetwork());
+//        initializeHeartbeats(networkTopology.getProcessesInNetwork());
     }
 
 
@@ -74,21 +67,22 @@ public class PerfectLink {
             public void run() {
                 boolean sending = true;
                 while(sending){
-                    messagesToSend.forEach((Tuple<ProcessDetails, String> m) -> {
-                        byte[] buf = m.y.getBytes();
-                        DatagramPacket packet
-                                = null;
+                    messagesToSend.forEach((Message m) -> {
+                        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+                        ObjectOutput oo;
                         try {
-                            packet = new DatagramPacket(buf, buf.length, InetAddress.getByName(m.x.getAddress()), m.x.getPort());
-                        } catch (UnknownHostException e) {
-                            e.printStackTrace();
-                        }
-                        try {
+                            oo = new ObjectOutputStream(bStream);
+                            oo.writeObject(m);
+                            oo.close();
+                            byte[] buf = bStream.toByteArray();
+                            DatagramPacket packet;
+                            packet = new DatagramPacket(buf, buf.length, InetAddress.getByName(m.getDestination().getAddress()), m.getDestination().getPort());
                             socket.send(packet);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     });
+
                     if (!messagesToAdd.isEmpty()) {
                         messagesToSend.addAll(messagesToAdd);
                         messagesToAdd.clear();
@@ -108,27 +102,25 @@ public class PerfectLink {
      * Add messages to send by perfect link sender
      * @param messagesToAdd
      */
-    public void addMessagesToQueue(ArrayList<Tuple<ProcessDetails, String>> messagesToAdd) {
+    public void addMessagesToQueue(ArrayList<Message> messagesToAdd) {
         this.messagesToAdd.addAll(messagesToAdd);
     }
-    public void addMessagesToQueue(Tuple<ProcessDetails, String> messagesToAdd) {
-        this.messagesToAdd.add(messagesToAdd);
+    public void addMessagesToQueue(Message messageToAdd) {
+        this.messagesToAdd.add(messageToAdd);
     }
 
     public void initializeHeartbeats(ArrayList<ProcessDetails> alive){
         for (ProcessDetails p : alive) {
-            Tuple<ProcessDetails, String> heartbeat = new Tuple<>(p, "heartbeat");
-            addMessagesToQueue(heartbeat);
+//            Message heartbeat = new Message(p, "heartbeat");
+//            addMessagesToQueue(heartbeat);
         }
     }
 
-    public void deliver(String received, int sourcePort) {
-        ProcessDetails source = networkTopology.getProcessFromPort(sourcePort);
-        perfectLinkDeliveredMessages.add(new Tuple<>(source, received));
-
+    public void deliver(ProcessDetails source, Message received) {
+        beb.callback();
         // TODO remove -> just for debugging
-        ProcessDetails destination = networkTopology.getProcessFromPort(socket.getLocalPort());
-        System.out.println("from process " + source.getId() + " to process " + destination.getId() + " delivered message "+ received );
+
+
     }
 
 }
