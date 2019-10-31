@@ -27,5 +27,13 @@ public class MainTmp {
 		proc1.startClient();
 		proc2.startClient();
 
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("Kill process 2");
+		proc2.getPerfectLink().getMessagesToSend().clear();
+
 	}
 }

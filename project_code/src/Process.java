@@ -8,6 +8,8 @@ public class Process{
     private DatagramSocket UDPinterface;
     private NetworkTopology network;
     private PerfectLink perfectLink;
+    private PerfectFailureDetector failureDetector;
+    private final int timeout;
 
     /**
      * This method is used to parse a string into an InetAddress
@@ -46,6 +48,10 @@ public class Process{
         return processReceivePort;
     }
 
+    public PerfectLink getPerfectLink() {
+        return perfectLink;
+    }
+
     /**
      * Constructor of the process
      * @param processId The ID of the process
@@ -54,11 +60,13 @@ public class Process{
     * */
     public Process(int processId, String processIP, int processReceivePort, ArrayList<ProcessDetails> processesInNetwork) throws SocketException {
         this.processId = processId;
+        this.timeout = 2000;
         this.processIP = parseAddress(processIP);
         this.processReceivePort = processReceivePort;
         this.network = new NetworkTopology(processesInNetwork);
         this.UDPinterface = new DatagramSocket(processReceivePort);
-        this.perfectLink = new PerfectLink(UDPinterface, network);
+        this.failureDetector = new PerfectFailureDetector(network, timeout);
+        this.perfectLink = new PerfectLink(UDPinterface, network, failureDetector, timeout);
     }
 
     public void addMessagesToQueue(ArrayList<Tuple<ProcessDetails, String>> messagesToAdd) {
@@ -67,5 +75,6 @@ public class Process{
 
     public void startClient(){
         perfectLink.sendMessages();
+
     }
 }

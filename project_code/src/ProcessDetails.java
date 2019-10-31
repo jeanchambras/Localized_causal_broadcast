@@ -1,15 +1,13 @@
-import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Set;
 
 public class ProcessDetails {
-    private InetAddress address;
+    private String address;
     private int port;
     private int id;
 
 
     public ProcessDetails(int id, String address, int port) throws UnknownHostException {
-        this.address = InetAddress.getByName(address);
+        this.address = address;
         this.port = port;
         this.id = id;
     }
@@ -30,7 +28,7 @@ public class ProcessDetails {
         return port;
     }
 
-    public InetAddress getAddress() {
+    public String getAddress() {
         return address;
     }
 }
