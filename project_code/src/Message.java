@@ -19,6 +19,10 @@ public class Message implements Serializable {
         return destination;
     }
 
+    public ProcessDetails getSource() {
+        return source;
+    }
+
     @Override
     public boolean equals(Object o) {
 

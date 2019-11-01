@@ -57,14 +57,14 @@ public class Process{
     * */
     public Process(int processId, String processIP, int processReceivePort, ArrayList<ProcessDetails> processesInNetwork) throws SocketException {
         this.processId = processId;
-        this.timeout = 1000;
+        this.timeout = 10;
         this.processIP = parseAddress(processIP);
         this.processReceivePort = processReceivePort;
         this.network = new NetworkTopology(processesInNetwork);
         this.UDPinterface = new DatagramSocket(processReceivePort);
         this.failureDetector = new PerfectFailureDetector(network, timeout);
-        this.broadcast = new Beb(UDPinterface, network, "6",failureDetector,  timeout);
-        startClient();
+        this.broadcast = new Beb(UDPinterface, network, 80,failureDetector,  timeout);
+        broadcast.sendMessages();
     }
 
     public void startClient(){
