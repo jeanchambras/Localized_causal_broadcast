@@ -1,69 +1,18 @@
-import java.net.*;
-import java.util.*;
+import java.net.DatagramSocket;
+import java.net.SocketException;
+import java.util.ArrayList;
 
 public class Process{
-    private int processId;
-    private InetAddress processIP;
-    private int processReceivePort;
     private DatagramSocket UDPinterface;
     private NetworkTopology network;
-    private PerfectFailureDetector failureDetector;
     private Beb broadcast;
     private final int timeout;
 
-    /**
-     * This method is used to parse a string into an InetAddress
-     * @param ip the ip address as a String
-     * @return the ip address as an InetAddress of the process
-     */
-    private InetAddress parseAddress(String ip){
-        InetAddress address = null;
-        try {
-            address = InetAddress.getByName(ip);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        return address;
-    }
-
-    /**
-     * @return the id of the process
-     */
-    public int getProcessId() {
-        return processId;
-    }
-
-    /**
-     * @return the ip address of the process
-     */
-    public InetAddress getProcessIP() {
-        return processIP;
-    }
-
-
-    /**
-     * @return the port number of the process
-     */
-    public int getProcessReceivePort() {
-        return processReceivePort;
-    }
-
-
-    /**
-     * Constructor of the process
-     * @param processId The ID of the process
-     * @param processIP The IP address of the process
-     * @param processReceivePort The port number the process is listening for incoming packets
-    * */
-    public Process(int processId, String processIP, int processReceivePort, ArrayList<ProcessDetails> processesInNetwork) throws SocketException {
-        this.processId = processId;
-        this.timeout = 10;
-        this.processIP = parseAddress(processIP);
-        this.processReceivePort = processReceivePort;
+    public Process(int processReceivePort, ArrayList<ProcessDetails> processesInNetwork, int numberOfMessages) throws SocketException {
+        this.timeout = 5;
         this.network = new NetworkTopology(processesInNetwork);
         this.UDPinterface = new DatagramSocket(processReceivePort);
-        this.failureDetector = new PerfectFailureDetector(network, timeout);
-        this.broadcast = new Beb(UDPinterface, network, 80,failureDetector,  timeout);
+        this.broadcast = new Beb(UDPinterface, network, numberOfMessages, timeout);
         broadcast.sendMessages();
     }
 

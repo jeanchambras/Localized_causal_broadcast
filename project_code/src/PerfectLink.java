@@ -1,45 +1,44 @@
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class PerfectLink {
-    private ArrayList<Message> messagesToAdd;
-    private ArrayList<Message> addAck;
-    private ArrayList<Message> messagesToAck;
-    private ArrayList<Message> receivedMessages;
-    private ArrayList<Message> messagesToDelete;
     private ArrayList<Message> messagesToSend;
-    private NetworkTopology networkTopology;
+    private ArrayList<Message> nextMessagesToSend;
+    private ArrayList<Message> messagesToAck;
+    private ArrayList<Message> nextMessagesToAck;
+    private ArrayList<Message> receivedMessages;
+    private ArrayList<Message> messagesAcked;
     private DatagramSocket socket;
     private Thread server;
     private Thread client;
     private int timeout;
     private Listener beb;
 
-    public ArrayList<Message> getMessagesToSend() {
-        return messagesToSend;
-    }
-
-
-    public PerfectLink(DatagramSocket socket, NetworkTopology networkTopology, PerfectFailureDetector failureDetector, int timeout, Listener beb){
+    public PerfectLink(DatagramSocket socket, int timeout, Listener beb){
         this.receivedMessages = new ArrayList<>();
-        this.addAck = new ArrayList<>();
         this.messagesToAck = new ArrayList<>();
-        this.networkTopology = networkTopology;
+        this.nextMessagesToAck = new ArrayList<>();
+        this.messagesAcked = new ArrayList<>();
+        this.messagesToSend = new ArrayList<>();
+        this.nextMessagesToSend = new ArrayList<>();
         this.socket = socket;
         this.timeout = timeout;
-        this.messagesToSend = new ArrayList<>();
-        this.messagesToAdd = new ArrayList<>();
-        this.messagesToDelete = new ArrayList<>();
         this.beb = beb;
+        // start a thread that listen for incoming packets
         this.server = new Thread(new Runnable() {
             public void run() {
-                boolean running = true;
                 byte[] buf = new byte[512];
                 Packet packet = null;
-                while (running) {
+                while (true) {
                     DatagramPacket UDPpacket
                             = new DatagramPacket(buf, buf.length);
                     try {
@@ -52,75 +51,58 @@ public class PerfectLink {
                         System.err.println(e);
                     }
                    if (packet.message == null && packet.ack != null){
-                         messagesToDelete.add(packet.ack.getMessage());
+                         messagesAcked.add(packet.ack.getMessage());
                    } else if (packet.ack == null && packet.message != null) {
                         Message message = packet.message;
-                        addAck.add(message);
+                        nextMessagesToAck.add(message);
                        if (!receivedMessages.contains(message)) {
-                           System.out.println(networkTopology.getProcessFromPort(UDPpacket.getPort()).getId() + " : " + message.getPayload());
-                           deliver(networkTopology.getProcessFromPort(UDPpacket.getPort()), message);
+                           deliver(message);
                            receivedMessages.add(message);
                        }
                    }
                 }
-                socket.close();
             }
         });
         server.start();
     }
-
-
+    // TODO start a thread that starts to send messages -> we should handle USR2 signal before starting to send
     public void sendMessages(){
         this.client = new Thread(new Runnable() {
             public void run() {
-                boolean sending = true;
-                while(sending){
-                    messagesToSend.forEach((Message m) -> {
-                        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
-                        ObjectOutput oo;
-                        Packet p = new Packet(m);
-                        try {
-                            oo = new ObjectOutputStream(bStream);
-                            oo.writeObject(p);
-                            oo.close();
-                            byte[] buf = bStream.toByteArray();
-                            DatagramPacket packet;
-                            packet = new DatagramPacket(buf, buf.length, InetAddress.getByName(m.getDestination().getAddress()), m.getDestination().getPort());
-                            socket.send(packet);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                    messagesToAck.forEach((Message m) -> {
-                        Ack a = new Ack(m);
-                        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
-                        ObjectOutput oo;
-                        Packet p = new Packet(a);
-                        try {
-                            oo = new ObjectOutputStream(bStream);
-                            oo.writeObject(p);
-                            oo.close();
-                            byte[] buf = bStream.toByteArray();
-                            DatagramPacket packet;
-                            packet = new DatagramPacket(buf, buf.length, InetAddress.getByName(m.getSource().getAddress()), m.getSource().getPort());
-                            socket.send(packet);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
+                while(true){
 
-                    messagesToAck.clear();
-                    if(!addAck.isEmpty()){
-                        messagesToAck.addAll(addAck);
-                        addAck.clear();
+                    synchronized(messagesToSend)
+                    {
+                        Iterator<Message> it = messagesToSend.iterator();
+                        while (it.hasNext()){
+                            Message m = it.next();
+                            Packet p = new Packet(m);
+                            sendPacket(p, m.getDestination());
+                        }
                     }
-                    if (!messagesToAdd.isEmpty()) {
-                        messagesToSend.addAll(messagesToAdd);
-                        messagesToAdd.clear();
+                    synchronized(messagesToAck)
+                    {
+                        Iterator<Message> it = messagesToAck.iterator();
+                        while (it.hasNext()){
+                            Message m = it.next();
+                            Ack a = new Ack(m);
+                            Packet p = new Packet(a);
+                            sendPacket(p, m.getSource());
+                        }
+                        messagesToAck.clear();
                     }
-                    if (!messagesToDelete.isEmpty()) {
-                        messagesToSend.removeAll(messagesToDelete);
-                        messagesToDelete.clear();
+
+                    if(!nextMessagesToAck.isEmpty()){
+                        messagesToAck.addAll(nextMessagesToAck);
+                        nextMessagesToAck.clear();
+                    }
+                    if (!nextMessagesToSend.isEmpty()) {
+                        messagesToSend.addAll(nextMessagesToSend);
+                        nextMessagesToSend.clear();
+                    }
+                    if (!messagesAcked.isEmpty()) {
+                        messagesToSend.removeAll(messagesAcked);
+                        messagesAcked.clear();
                     }
                     try {
                         Thread.sleep(timeout);
@@ -133,29 +115,28 @@ public class PerfectLink {
         client.start();
     }
 
-    /**
-     * Add messages to send by perfect link sender
-     * @param messagesToAdd
-     */
     public void addMessagesToQueue(ArrayList<Message> messagesToAdd) {
-        this.messagesToAdd.addAll(messagesToAdd);
-    }
-    public void addMessagesToQueue(Message messageToAdd) {
-        this.messagesToAdd.add(messageToAdd);
+        this.nextMessagesToSend.addAll(messagesToAdd);
     }
 
-    public void initializeHeartbeats(ArrayList<ProcessDetails> alive){
-        for (ProcessDetails p : alive) {
-//            Message heartbeat = new Message(p, "heartbeat");
-//            addMessagesToQueue(heartbeat);
+    public void sendPacket(Packet p, ProcessDetails destination){
+        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+        ObjectOutput oo;
+        try {
+            oo = new ObjectOutputStream(bStream);
+            oo.writeObject(p);
+            oo.close();
+            byte[] buf = bStream.toByteArray();
+            DatagramPacket packet;
+            packet = new DatagramPacket(buf, buf.length, InetAddress.getByName(destination.getAddress()), destination.getPort());
+            socket.send(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    public void deliver(ProcessDetails source, Message received) {
-        beb.callback();
-        // TODO remove -> just for debugging
-
-
+    public void deliver(Message received) {
+        beb.callback(received);
     }
 
 }

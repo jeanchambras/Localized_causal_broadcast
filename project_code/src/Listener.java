@@ -1,3 +1,3 @@
 public interface Listener {
-    void callback();
+    void callback(Message m);
 }
