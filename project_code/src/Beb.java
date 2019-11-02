@@ -3,14 +3,21 @@ import java.util.ArrayList;
 
 public class Beb implements Listener {
     private PerfectLink perfectLink;
+    private Listener urb;
+    private NetworkTopology networkTopology;
+    private DatagramSocket socket;
+    private ArrayList<Message> messages;
 
-
-    public Beb (DatagramSocket socket, NetworkTopology network, int numberOfMessages, int timeout){
+    public Beb (DatagramSocket socket, NetworkTopology network, int numberOfMessages, int timeout, Listener urb){
         this.perfectLink = new PerfectLink(socket, timeout, this);
-        ArrayList<Message> messages = new ArrayList();
+        this.networkTopology = network;
+        this.socket = socket;
+        this.urb = urb;
+        this.messages = new ArrayList<>();
         for (ProcessDetails processDetails : network.getProcessesInNetwork()) {
             for (int i = 1; i <= numberOfMessages; ++i){
-                messages.add(new Message(processDetails,network.getProcessFromPort(socket.getLocalPort()), Integer.toString(i)));
+                ProcessDetails localDetails = networkTopology.getProcessFromPort(socket.getLocalPort());
+                this.messages.add(new Message(processDetails,network.getProcessFromPort(socket.getLocalPort()), Integer.toString(i),localDetails));
             }
         }
         perfectLink.addMessagesToQueue(messages);
@@ -25,7 +32,19 @@ public class Beb implements Listener {
     }
 
     public void deliver(Message m){
-        System.out.println("Process " + m.getSource().getId() + " beb-delivered message : "+ m.getPayload() + " from process "+ m.getSource().getId());
+        //System.out.println("Process " + m.getSource().getId() + " beb-delivered message : "+ m.getPayload() + " from process "+ m.getSource().getId());
+        urb.callback(m);
     }
 
+    public NetworkTopology getNetworkTopology(){
+        return this.networkTopology;
+    }
+
+    public DatagramSocket getSocket(){
+        return this.socket;
+    }
+
+    public ArrayList<Message> getMessages(){
+        return  this.messages;
+    }
 }

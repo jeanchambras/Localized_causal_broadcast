@@ -4,11 +4,14 @@ public class Message implements Serializable {
     private ProcessDetails destination;
     private ProcessDetails source;
     private String payload;
+    private ProcessDetails sender;
 
-    public Message(ProcessDetails destination, ProcessDetails source, String payload){
-        this.payload = payload;
+    public Message(ProcessDetails destination, ProcessDetails source, String payload, ProcessDetails sender){
         this.destination = destination;
         this.source = source;
+        this.payload = payload;
+        this.sender = sender;
+
     }
 
     public String getPayload() {
@@ -21,6 +24,10 @@ public class Message implements Serializable {
 
     public ProcessDetails getSource() {
         return source;
+    }
+
+    public ProcessDetails getSender(){
+        return sender;
     }
 
     @Override

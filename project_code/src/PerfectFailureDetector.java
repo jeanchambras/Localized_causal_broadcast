@@ -17,12 +17,13 @@ public class PerfectFailureDetector{
             public void run() {
                 boolean running = true;
                 while (running) {
-                    network.getProcessesInNetwork().forEach((ProcessDetails p) -> {
+                    ArrayList<ProcessDetails> processesInNetwork = network.getProcessesInNetwork();
+                    for (ProcessDetails p: processesInNetwork) {
                         if(!alive.contains(p) && !detected.contains(p)){
                             System.out.println("Process " + p.getId() + " has crashed");
                             detected.add(p);
                         }
-                    });
+                    }
                     alive.clear();
                     try {
                         Thread.sleep(2* timeout);

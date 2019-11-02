@@ -35,5 +35,5 @@ public class MainTmp {
 	Process proc11 = new Process( 1111, initalProcessInNetwork,n);
 	Process proc12 = new Process( 1212, initalProcessInNetwork,n);
 	Process proc13 = new Process( 1313, initalProcessInNetwork,n);
-}
+	}
 }

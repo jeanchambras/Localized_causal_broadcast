@@ -14,16 +14,11 @@ public class NetworkTopology {
     }
 
     public ProcessDetails getProcessFromPort(int port){
-        ProcessDetails process = null;
         for (ProcessDetails p : processesInNetwork) {
             if (p.getPort() == port) {
-                process = p;
+                return p;
             }
         }
-        if (process.getPort() == port) {
-            return process;
-        } else {
-            throw new ValueException("Not valid port number");
-        }
+        throw new ValueException("Not valid port number");
     }
 }

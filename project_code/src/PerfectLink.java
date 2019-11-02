@@ -36,6 +36,7 @@ public class PerfectLink {
         // start a thread that listen for incoming packets
         this.server = new Thread(new Runnable() {
             public void run() {
+                //System.out.println(socket.getLocalAddress().toString()+socket.getLocalPort());
                 byte[] buf = new byte[512];
                 Packet packet = null;
                 while (true) {
@@ -67,6 +68,8 @@ public class PerfectLink {
     }
     // TODO start a thread that starts to send messages -> we should handle USR2 signal before starting to send
     public void sendMessages(){
+
+        //System.out.println(this.beb.getNetworkTopology().getProcessFromPort(beb.getSocket().getLocalPort()).getPort());
         this.client = new Thread(new Runnable() {
             public void run() {
                 while(true){
