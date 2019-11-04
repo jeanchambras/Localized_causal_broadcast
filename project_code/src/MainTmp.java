@@ -22,7 +22,7 @@ public class MainTmp {
 				new ProcessDetails(12, "127.0.0.1", 1212),
 				new ProcessDetails(13, "127.0.0.1", 1313)));
 
-		int n = 5;
+		int n = 3;
 	Process proc1 = new Process(1001, initalProcessInNetwork, n);
 	Process proc2 = new Process(2002, initalProcessInNetwork,n);
 	Process proc3 = new Process( 3003, initalProcessInNetwork,n);

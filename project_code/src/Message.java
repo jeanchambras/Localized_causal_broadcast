@@ -6,11 +6,11 @@ public class Message implements Serializable {
     private String payload;
     private ProcessDetails sender;
 
-    public Message(ProcessDetails destination, ProcessDetails source, String payload, ProcessDetails sender){
+    public Message(ProcessDetails destination, ProcessDetails source, String payload){
         this.destination = destination;
         this.source = source;
         this.payload = payload;
-        this.sender = sender;
+        //this.sender = sender;
 
     }
 
@@ -26,9 +26,7 @@ public class Message implements Serializable {
         return source;
     }
 
-    public ProcessDetails getSender(){
-        return sender;
-    }
+    //public ProcessDetails getSender(){ return sender; }
 
     @Override
     public boolean equals(Object o) {

@@ -17,7 +17,7 @@ public class Beb implements Listener {
         for (ProcessDetails processDetails : network.getProcessesInNetwork()) {
             for (int i = 1; i <= numberOfMessages; ++i){
                 ProcessDetails localDetails = networkTopology.getProcessFromPort(socket.getLocalPort());
-                this.messages.add(new Message(processDetails,network.getProcessFromPort(socket.getLocalPort()), Integer.toString(i),localDetails));
+                this.messages.add(new Message(processDetails,network.getProcessFromPort(socket.getLocalPort()), Integer.toString(i)));
             }
         }
         perfectLink.addMessagesToQueue(messages);
