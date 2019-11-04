@@ -36,4 +36,9 @@ public class ProcessDetails implements Serializable {
         ProcessDetails c = (ProcessDetails) o;
         return this.id == c.id;
     }
+
+    @Override
+    public int hashCode() {
+        return port * (id+7) * address.hashCode();
+    }
 }

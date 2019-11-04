@@ -6,12 +6,11 @@ public class Message implements Serializable {
     private String payload;
     private ProcessDetails sender;
 
-    public Message(ProcessDetails destination, ProcessDetails source, String payload){
+    public Message(ProcessDetails destination, ProcessDetails source, String payload, ProcessDetails sender){
         this.destination = destination;
         this.source = source;
         this.payload = payload;
-        //this.sender = sender;
-
+        this.sender = sender;
     }
 
     public String getPayload() {
@@ -24,6 +23,14 @@ public class Message implements Serializable {
 
     public ProcessDetails getSource() {
         return source;
+    }
+
+    public ProcessDetails getSender() {
+        return sender;
+    }
+
+    public void setSender(ProcessDetails sender) {
+        this.sender = sender;
     }
 
     //public ProcessDetails getSender(){ return sender; }
@@ -39,4 +46,10 @@ public class Message implements Serializable {
         Message c = (Message) o;
         return this.destination.equals(c.destination)&& this.source.equals(c.source) && this.payload.equals(c.payload);
     }
+
+    @Override
+    public int hashCode() {
+        return destination.hashCode() * source.hashCode() * payload.hashCode();
+    }
+
 }

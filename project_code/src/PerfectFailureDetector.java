@@ -13,23 +13,21 @@ public class PerfectFailureDetector{
         this.detected = new HashSet<>();
         alive.addAll(network.getProcessesInNetwork());
 
-        new Thread(new Runnable() {
-            public void run() {
-                boolean running = true;
-                while (running) {
-                    ArrayList<ProcessDetails> processesInNetwork = network.getProcessesInNetwork();
-                    for (ProcessDetails p: processesInNetwork) {
-                        if(!alive.contains(p) && !detected.contains(p)){
-                            System.out.println("Process " + p.getId() + " has crashed");
-                            detected.add(p);
-                        }
+        new Thread(() -> {
+            boolean running = true;
+            while (running) {
+                ArrayList<ProcessDetails> processesInNetwork = network.getProcessesInNetwork();
+                for (ProcessDetails p: processesInNetwork) {
+                    if(!alive.contains(p) && !detected.contains(p)){
+                        System.out.println("Process " + p.getId() + " has crashed");
+                        detected.add(p);
                     }
-                    alive.clear();
-                    try {
-                        Thread.sleep(2* timeout);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                }
+                alive.clear();
+                try {
+                    Thread.sleep(2* timeout);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         }).start();

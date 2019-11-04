@@ -19,6 +19,6 @@ public class Process{
     }
 
     public void startClient(){
-        broadcast.sendMessages();
+        urb.sendMessages();
     }
 }

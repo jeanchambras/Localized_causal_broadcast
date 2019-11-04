@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class PerfectLink {
+
     private ArrayList<Message> messagesToSend;
     private ArrayList<Message> nextMessagesToSend;
     private ArrayList<Message> messagesToAck;
@@ -70,48 +71,46 @@ public class PerfectLink {
     public void sendMessages(){
 
         //System.out.println(this.beb.getNetworkTopology().getProcessFromPort(beb.getSocket().getLocalPort()).getPort());
-        this.client = new Thread(new Runnable() {
-            public void run() {
-                while(true){
+        this.client = new Thread(() -> {
+            while(true){
 
-                    synchronized(messagesToSend)
-                    {
-                        Iterator<Message> it = messagesToSend.iterator();
-                        while (it.hasNext()){
-                            Message m = it.next();
-                            Packet p = new Packet(m);
-                            sendPacket(p, m.getDestination());
-                        }
+                synchronized(messagesToSend)
+                {
+                    Iterator<Message> it = messagesToSend.iterator();
+                    while (it.hasNext()){
+                        Message m = it.next();
+                        Packet p = new Packet(m);
+                        sendPacket(p, m.getDestination());
                     }
-                    synchronized(messagesToAck)
-                    {
-                        Iterator<Message> it = messagesToAck.iterator();
-                        while (it.hasNext()){
-                            Message m = it.next();
-                            Ack a = new Ack(m);
-                            Packet p = new Packet(a);
-                            sendPacket(p, m.getSource());
-                        }
-                        messagesToAck.clear();
+                }
+                synchronized(messagesToAck)
+                {
+                    Iterator<Message> it = messagesToAck.iterator();
+                    while (it.hasNext()){
+                        Message m = it.next();
+                        Ack a = new Ack(m);
+                        Packet p = new Packet(a);
+                        sendPacket(p, m.getSource());
                     }
+                    messagesToAck.clear();
+                }
 
-                    if(!nextMessagesToAck.isEmpty()){
-                        messagesToAck.addAll(nextMessagesToAck);
-                        nextMessagesToAck.clear();
-                    }
-                    if (!nextMessagesToSend.isEmpty()) {
-                        messagesToSend.addAll(nextMessagesToSend);
-                        nextMessagesToSend.clear();
-                    }
-                    if (!messagesAcked.isEmpty()) {
-                        messagesToSend.removeAll(messagesAcked);
-                        messagesAcked.clear();
-                    }
-                    try {
-                        Thread.sleep(timeout);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                if(!nextMessagesToAck.isEmpty()){
+                    messagesToAck.addAll(nextMessagesToAck);
+                    nextMessagesToAck.clear();
+                }
+                if (!nextMessagesToSend.isEmpty()) {
+                    messagesToSend.addAll(nextMessagesToSend);
+                    nextMessagesToSend.clear();
+                }
+                if (!messagesAcked.isEmpty()) {
+                    messagesToSend.removeAll(messagesAcked);
+                    messagesAcked.clear();
+                }
+                try {
+                    Thread.sleep(timeout);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -140,6 +139,14 @@ public class PerfectLink {
 
     public void deliver(Message received) {
         beb.callback(received);
+    }
+
+    public ArrayList<Message> getMessagesToSend() {
+        return messagesToSend;
+    }
+
+    public void setMessagesToSend(ArrayList<Message> messagesToSend) {
+        this.messagesToSend = messagesToSend;
     }
 
 }
