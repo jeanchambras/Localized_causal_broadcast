@@ -18,6 +18,9 @@ public class Beb implements Listener {
 
     }
 
+    public void addMessages(ArrayList<Message> messages){
+        perfectLink.addMessagesToQueue(messages);
+    }
     public void sendMessages(ArrayList<Message> messages){
         perfectLink.addMessagesToQueue(messages);
         perfectLink.sendMessages();

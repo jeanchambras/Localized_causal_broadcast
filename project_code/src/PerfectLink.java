@@ -37,7 +37,6 @@ public class PerfectLink {
         // start a thread that listen for incoming packets
         this.server = new Thread(new Runnable() {
             public void run() {
-                //System.out.println(socket.getLocalAddress().toString()+socket.getLocalPort());
                 byte[] buf = new byte[512];
                 Packet packet = null;
                 while (true) {
@@ -50,7 +49,7 @@ public class PerfectLink {
                         packet = (Packet) iStream.readObject();
                         iStream.close();
                     } catch (IOException | ClassNotFoundException e) {
-                        System.err.println(e);
+                        e.printStackTrace();
                     }
                    if (packet.message == null && packet.ack != null){
                          messagesAcked.add(packet.ack.getMessage());
@@ -69,8 +68,6 @@ public class PerfectLink {
     }
     // TODO start a thread that starts to send messages -> we should handle USR2 signal before starting to send
     public void sendMessages(){
-
-        //System.out.println(this.beb.getNetworkTopology().getProcessFromPort(beb.getSocket().getLocalPort()).getPort());
         this.client = new Thread(() -> {
             while(true){
 
@@ -90,7 +87,7 @@ public class PerfectLink {
                         Message m = it.next();
                         Ack a = new Ack(m);
                         Packet p = new Packet(a);
-                        sendPacket(p, m.getSource());
+                        sendPacket(p, m.getSender());
                     }
                     messagesToAck.clear();
                 }

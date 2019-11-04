@@ -21,7 +21,6 @@ public class Urb implements Listener {
 
 
     public Urb (DatagramSocket socket, NetworkTopology network, int numberOfMessages, int timeout){
-        System.out.println("URB..");
         this.beb = new Beb(socket, network, numberOfMessages, timeout, this);
         this.network = network;
         this.numberOfMessages = numberOfMessages;
@@ -35,10 +34,10 @@ public class Urb implements Listener {
         //We add to the set of alive processes all known processes initially
         aliveProcesses.addAll(network.getProcessesInNetwork());
 
-        Runnable checkpendingMsg = this::intermittentCallback;
+//        Runnable checkpendingMsg = this::intermittentCallback;
 
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(checkpendingMsg, 0, 1, TimeUnit.SECONDS);
+//        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+//        executor.scheduleAtFixedRate(checkpendingMsg, 0, 100, TimeUnit.MICROSECONDS);
 
 
     }
@@ -51,9 +50,8 @@ public class Urb implements Listener {
         for (ProcessDetails destination : network.getProcessesInNetwork()) {
             for (int i = 1; i <= numberOfMessages; ++i){
                 ProcessDetails source = network.getProcessFromPort(socket.getLocalPort());
-                ProcessDetails sender = network.getProcessFromPort(socket.getLocalPort());
                 String messageNumber = Integer.toString(i);
-                messages.add(new Message(destination, source, messageNumber, sender));
+                messages.add(new Message(destination, source, messageNumber, source));
             }
         }
 
@@ -66,14 +64,14 @@ public class Urb implements Listener {
         beb.sendMessages(messages);
     }
 
-    public void deliver(Message m){
+    public synchronized void deliver(Message m){
         //ADD ACK
         ProcessDetails localDetail = network.getProcessFromPort(beb.getSocket().getLocalPort());
         ProcessDetails sender = m.getSender();
 
 
         if(!ackedMessages.containsKey(m)) {
-            ackedMessages.put(m, Collections.singleton(sender));
+            ackedMessages.put(m, new HashSet<>(Arrays.asList(sender)));
         } else {
             Set<ProcessDetails> set = ackedMessages.get(m);
             set.add(sender);
@@ -83,23 +81,27 @@ public class Urb implements Listener {
         //CHECK PENDING
         if (!pendingMessages.contains(m)){
             ArrayList<Message> messages = new ArrayList<>();
-            m.setSender(sender);
+            m.setSender(network.getProcessFromPort(socket.getLocalPort()));
             messages.add(m);
             pendingMessages.add(m);
-            beb.sendMessages(messages);
+            beb.addMessages(messages);
         }
 
-        System.out.println("Process " + m.getSource().getId() + " urb-delivered message : "+ m.getPayload() + " from process "+ m.getSource().getId());
+//        System.out.println("Process " + m.getSource().getId() + " urb-delivered message : "+ m.getPayload() + " from process "+ m.getSource().getId());
+        intermittentCallback();
     }
 
     public void intermittentCallback(){
-        for (Message m : pendingMessages){
-            if (pendingMessages.contains(m) && canDeliver(m) && !delivered.contains(m)){
-                delivered.add(m);
-                System.out.println("URB-DELIVERED");
+
+            Iterator<Message> it = pendingMessages.iterator();
+            while (it.hasNext()){
+                Message m = it.next();
+                if (pendingMessages.contains(m) && canDeliver(m) && !delivered.contains(m)){
+                    delivered.add(m);
+                    it.remove();
+                    System.out.println("URB-DELIVERED");
 
             }
-
         }
     }
 
@@ -108,7 +110,7 @@ public class Urb implements Listener {
         int N = network.getProcessesInNetwork().size();
         if (ackedMessages.containsKey(m)){
             int numberAcked = ackedMessages.get(m).size();
-            return 2*numberAcked > N;
+            return 2*numberAcked >= N;
         }
 
         return false;
