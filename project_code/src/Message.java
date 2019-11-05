@@ -44,7 +44,7 @@ public class Message implements Serializable {
             return false;
         }
         Message c = (Message) o;
-        return this.destination.equals(c.destination)&& this.source.equals(c.source) && this.payload.equals(c.payload);
+        return this.destination.equals(c.destination)&& this.source.equals(c.source) && this.payload.equals(c.payload) && this.sender.equals(c.sender);
     }
 
     @Override

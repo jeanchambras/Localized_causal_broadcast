@@ -18,20 +18,28 @@ public class Beb implements Listener {
 
     }
 
-    public void addMessages(ArrayList<Message> messages){
+    public void addMessages(ProcessDetails source, String payload){
+//        System.out.println(networkTopology.getProcessFromPort(socket.getLocalPort()).getPort() + ": broadcast " + payload + " from "+ source.getPort());
+        ProcessDetails sender = networkTopology.getProcessFromPort(socket.getLocalPort());
+        ArrayList<Message> messages = new ArrayList<>();
+        for (ProcessDetails destination : networkTopology.getProcessesInNetwork()) {
+                Message m = new Message(destination, source, payload, sender);
+                messages.add(m);
+        }
         perfectLink.addMessagesToQueue(messages);
     }
-    public void sendMessages(ArrayList<Message> messages){
-        perfectLink.addMessagesToQueue(messages);
+
+    public void sendMessages(){
         perfectLink.sendMessages();
     }
+
     @Override
     public void callback(Message m) {
         deliver(m);
+
     }
 
     public void deliver(Message m){
-        //System.out.println("Process " + m.getSource().getId() + " beb-delivered message : "+ m.getPayload() + " from process "+ m.getSource().getId());
         urb.callback(m);
     }
 
