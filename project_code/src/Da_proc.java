@@ -30,7 +30,7 @@ public class Da_proc {
                 processesInNetwork.add(new ProcessDetails(Integer.parseInt(process_details[0]),process_details[1],Integer.parseInt(process_details[2])));
             }
             ProcessDetails processToLaunchDetails = processesInNetwork.get(processToLaunch - 1);
-            Process process = new Process(processToLaunchDetails.getPort(), processesInNetwork,Integer.parseInt(args[2]));
+            Process process = new Process(processToLaunchDetails.getPort(),processToLaunch, processesInNetwork,Integer.parseInt(args[2]));
             process.startClient();
         } catch(Exception e) {
             e.printStackTrace();

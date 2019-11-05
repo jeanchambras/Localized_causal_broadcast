@@ -1,3 +1,5 @@
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.DatagramSocket;
 import java.sql.SQLOutput;
 import java.util.*;
@@ -12,9 +14,10 @@ public class Urb implements Listener {
     private DatagramSocket socket;
     private Integer numberOfMessages;
     private int port;
+    private FileWriter f;
 
 
-    public Urb (DatagramSocket socket, NetworkTopology network, int numberOfMessages, int timeout){
+    public Urb (DatagramSocket socket, NetworkTopology network, int numberOfMessages, int timeout, FileWriter f){
         this.beb = new Beb(socket, network, numberOfMessages, timeout, this);
         this.network = network;
         this.numberOfMessages = numberOfMessages;
@@ -24,6 +27,7 @@ public class Urb implements Listener {
         this.pendingMessages = new HashSet<>();
         this.delivered = new HashSet<>();
         this.aliveProcesses = new HashSet<>();
+        this.f=f;
         //We add to the set of alive processes all known processes initially
         aliveProcesses.addAll(network.getProcessesInNetwork());
     }
@@ -33,6 +37,12 @@ public class Urb implements Listener {
             for (int i = 1; i <= numberOfMessages; ++i){
                 beb.addMessages(source, Integer.toString(i));
                 pendingMessages.add(new Tuple<>(Integer.toString(i), source));
+                try {
+                    f.write("b " + i + "\n");
+                    f.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
             beb.sendMessages();
     }
@@ -40,6 +50,12 @@ public class Urb implements Listener {
 
     public void deliver(Tuple<String, ProcessDetails> t){
         System.out.println(port + " : URB-DELIVERED : " + t.x + " : " + t.y.getId());
+        try {
+            f.write("d "+ t.y.getId() +" "+ t.x + "\n");
+            f.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void checkToDeliver(){

@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -17,12 +20,24 @@ public class MainTmp {
 		));
 
 		int n = 8;
-	Process proc1 = new Process(1001, initalProcessInNetwork, n);
-	Process proc2 = new Process(2002, initalProcessInNetwork,n);
-	Process proc3 = new Process(3003, initalProcessInNetwork,n);
-	Process proc4 = new Process(4004, initalProcessInNetwork,n);
-	Process proc5 = new Process(5005, initalProcessInNetwork,n);
-	Process proc6 = new Process(6006, initalProcessInNetwork,n);
-	Process proc7 = new Process(7007, initalProcessInNetwork,n);
+	Process proc1 = new Process(1001,1, initalProcessInNetwork, n);
+	Process proc2 = new Process(2002,2, initalProcessInNetwork,n);
+	Process proc3 = new Process(3003,3, initalProcessInNetwork,n);
+	Process proc4 = new Process(4004,4, initalProcessInNetwork,n);
+	Process proc5 = new Process(5005,5, initalProcessInNetwork,n);
+	Process proc6 = new Process(6006,6, initalProcessInNetwork,n);
+	Process proc7 = new Process(7007,7, initalProcessInNetwork,n);
+
+//		File fnew=new File("./test.out");
+//		try {
+//			FileWriter f2 = new FileWriter(fnew,false);
+//			f2.write("1\n");
+//			f2.write("2");
+//			f2.close();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+
+
 	}
 }
