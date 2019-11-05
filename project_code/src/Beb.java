@@ -54,4 +54,8 @@ public class Beb implements Listener {
     public ArrayList<Message> getMessages(){
         return  this.messages;
     }
+
+    public void stop(){
+        perfectLink.stop();
+    }
 }

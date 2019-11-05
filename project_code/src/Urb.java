@@ -111,4 +111,8 @@ public class Urb implements Listener {
         }
         checkToDeliver();
     }
+
+    public void stop(){
+        beb.stop();
+    }
 }

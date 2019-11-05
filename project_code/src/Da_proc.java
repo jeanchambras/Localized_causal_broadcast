@@ -1,5 +1,4 @@
 import java.io.*;
-import java.net.*;
 import java.util.*;
 
 public class Da_proc {
@@ -31,7 +30,6 @@ public class Da_proc {
             }
             ProcessDetails processToLaunchDetails = processesInNetwork.get(processToLaunch - 1);
             Process process = new Process(processToLaunchDetails.getPort(),processToLaunch, processesInNetwork,Integer.parseInt(args[2]));
-            process.startClient();
         } catch(Exception e) {
             e.printStackTrace();
         }
