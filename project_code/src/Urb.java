@@ -1,5 +1,6 @@
 import java.lang.reflect.Array;
 import java.net.DatagramSocket;
+import java.sql.SQLOutput;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -8,16 +9,13 @@ import java.util.concurrent.TimeUnit;
 public class Urb implements Listener {
     private Beb beb;
     private NetworkTopology network;
-
     private HashSet<Message> pendingMessages;
     private HashSet<Message> delivered;
     private HashSet<ProcessDetails> aliveProcesses;
-
     private HashMap<Message, Set<ProcessDetails>> ackedMessages;
-
     private DatagramSocket socket;
     private Integer numberOfMessages;
-
+    private int port;
 
 
     public Urb (DatagramSocket socket, NetworkTopology network, int numberOfMessages, int timeout){
@@ -25,7 +23,7 @@ public class Urb implements Listener {
         this.network = network;
         this.numberOfMessages = numberOfMessages;
         this.socket = socket;
-
+        this.port = socket.getLocalPort();
         this.ackedMessages = new HashMap<>();
 
         this.pendingMessages = new HashSet<>();
@@ -44,39 +42,34 @@ public class Urb implements Listener {
 
     //TODO: why are working with set of messages instead of single messages?
     public void sendMessages(){
-        ProcessDetails localDetail = network.getProcessFromPort(beb.getSocket().getLocalPort());
+        ProcessDetails source = network.getProcessFromPort(socket.getLocalPort());
         ArrayList<Message> messages = new ArrayList<>();
-
         for (ProcessDetails destination : network.getProcessesInNetwork()) {
             for (int i = 1; i <= numberOfMessages; ++i){
-                ProcessDetails source = network.getProcessFromPort(socket.getLocalPort());
                 String messageNumber = Integer.toString(i);
-                messages.add(new Message(destination, source, messageNumber, source));
+                Message m = new Message(destination, source, messageNumber, source);
+                messages.add(m);
+                pendingMessages.add(m);
             }
         }
-
-        for (Message message: messages){
-            //System.out.print("message" + message.getPayload());
-            message.setSender(localDetail);
-            pendingMessages.add(message);
-        }
-
         beb.sendMessages(messages);
     }
 
-    public synchronized void deliver(Message m){
+    public  void deliver(Message m){
+
         //ADD ACK
         ProcessDetails localDetail = network.getProcessFromPort(beb.getSocket().getLocalPort());
         ProcessDetails sender = m.getSender();
 
-
         if(!ackedMessages.containsKey(m)) {
             ackedMessages.put(m, new HashSet<>(Arrays.asList(sender)));
         } else {
+            System.out.println("wgerr");
             Set<ProcessDetails> set = ackedMessages.get(m);
             set.add(sender);
             ackedMessages.put(m, set);
         }
+       
 
         //CHECK PENDING
         if (!pendingMessages.contains(m)){
@@ -87,12 +80,10 @@ public class Urb implements Listener {
             beb.addMessages(messages);
         }
 
-//        System.out.println("Process " + m.getSource().getId() + " urb-delivered message : "+ m.getPayload() + " from process "+ m.getSource().getId());
         intermittentCallback();
     }
 
     public void intermittentCallback(){
-
             Iterator<Message> it = pendingMessages.iterator();
             while (it.hasNext()){
                 Message m = it.next();
@@ -107,9 +98,11 @@ public class Urb implements Listener {
 
 
     public boolean canDeliver(Message m){
+        System.out.println(port + " :" + ackedMessages.get(m));
         int N = network.getProcessesInNetwork().size();
         if (ackedMessages.containsKey(m)){
             int numberAcked = ackedMessages.get(m).size();
+            System.out.println("2 * " + numberAcked + ">= " + N);
             return 2*numberAcked >= N;
         }
 
