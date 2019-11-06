@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,7 +62,7 @@ public class PerfectLink {
             packet = new DatagramPacket(buf, buf.length, InetAddress.getByName(destination.getAddress()), destination.getPort());
             socket.send(packet);
         } catch (IOException e) {
-//            e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
@@ -78,12 +79,18 @@ public class PerfectLink {
         private AtomicBoolean running = new AtomicBoolean(true);
         public void run() {
             byte[] buf = new byte[512];
-            Packet packet = null;
+            Packet packet;
             while (running.get()) {
                 DatagramPacket UDPpacket
                         = new DatagramPacket(buf, buf.length);
                 try {
                     socket.receive(UDPpacket);
+                } catch (SocketTimeoutException e) {
+                    continue;
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+                try {
                     ObjectInputStream iStream;
                     iStream = new ObjectInputStream(new ByteArrayInputStream(buf));
                     packet = (Packet) iStream.readObject();
@@ -100,7 +107,7 @@ public class PerfectLink {
                     }
                 }
                 } catch (IOException | ClassNotFoundException e) {
-//                    e.printStackTrace();
+                    e.printStackTrace();
                 }
             }
         }
@@ -116,12 +123,10 @@ public class PerfectLink {
                     if(!messagesToSend.isEmpty()){
                         synchronized(messagesToSend)
                         {
-                            Iterator<Message> it = messagesToSend.iterator();
-                            while (it.hasNext()){
-                                Message m = it.next();
+                            messagesToSend.forEach((Message m) -> {
                                 Packet p = new Packet(m);
                                 sendPacket(p, m.getDestination());
-                            }
+                            });
                         }
 
                     }
@@ -129,17 +134,13 @@ public class PerfectLink {
                     if(!messagesToAck.isEmpty()){
                         synchronized(messagesToAck)
                         {
-                            Iterator<Message> it = messagesToAck.iterator();
-                            while (it.hasNext()){
-                                Message m = it.next();
+                            messagesToAck.forEach((Message m)->{
                                 Ack a = new Ack(m);
                                 Packet p = new Packet(a);
                                 sendPacket(p, m.getSender());
-                            }
+                            });
                             messagesToAck.clear();
                         }
-
-
                     }
 
                     if(!nextMessagesToAck.isEmpty()){
@@ -157,7 +158,7 @@ public class PerfectLink {
                     try {
                         Thread.sleep(timeout);
                     } catch (InterruptedException e) {
-//                        e.printStackTrace();
+                        e.printStackTrace();
                     }
                 }
             }

@@ -15,12 +15,10 @@ public class FIFO implements Listener {
     this.socket = socket;
     this.numberOfMessages=numberOfMessages;
     this.f = f;
-    }
 
-    public void sendMessages(){
         ProcessDetails source = network.getProcessFromPort(socket.getLocalPort());
         for (int i = 1; i <= numberOfMessages; ++i){
-            urb.sendMessages(source, Integer.toString(i));
+            urb.addMessages(source, Integer.toString(i));
             try {
                 f.write("b " + i + "\n");
                 f.flush();
@@ -29,6 +27,11 @@ public class FIFO implements Listener {
             }
         }
     }
+
+    public void sendMessages(){
+        urb.sendMessages();
+    }
+
 
     @Override
     public void callback(Message m) {

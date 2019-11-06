@@ -33,10 +33,14 @@ public class Urb implements Listener {
     }
 
 
-    public void sendMessages(ProcessDetails source, String payload){
-                beb.addMessage(source, payload);
-                pendingMessages.add(new Tuple<>(payload, source));
+    public void sendMessages(){
                 beb.sendMessages();
+    }
+
+    public void addMessages(ProcessDetails source, String payload){
+        pendingMessages.add(new Tuple<>(payload, source));
+        beb.addMessage(source, payload);
+
     }
 
 
