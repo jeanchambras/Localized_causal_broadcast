@@ -69,14 +69,6 @@ public class PerfectLink {
         beb.callback(received);
     }
 
-    public ArrayList<Message> getMessagesToSend() {
-        return messagesToSend;
-    }
-
-    public void setMessagesToSend(ArrayList<Message> messagesToSend) {
-        this.messagesToSend = messagesToSend;
-    }
-
     public void stop(){
         server.stopServer();
         sender.stopSender();
@@ -165,7 +157,7 @@ public class PerfectLink {
                     try {
                         Thread.sleep(timeout);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+//                        e.printStackTrace();
                     }
                 }
             }

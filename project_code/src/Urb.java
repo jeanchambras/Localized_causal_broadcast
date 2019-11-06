@@ -1,7 +1,5 @@
 import java.io.FileWriter;
-import java.io.IOException;
 import java.net.DatagramSocket;
-import java.sql.SQLOutput;
 import java.util.*;
 
 public class Urb implements Listener {
@@ -15,9 +13,10 @@ public class Urb implements Listener {
     private Integer numberOfMessages;
     private int port;
     private FileWriter f;
+    private Listener fifo;
 
 
-    public Urb (DatagramSocket socket, NetworkTopology network, int numberOfMessages, int timeout, FileWriter f){
+    public Urb (DatagramSocket socket, NetworkTopology network, int numberOfMessages, int timeout, FileWriter f, Listener fifo){
         this.beb = new Beb(socket, network, numberOfMessages, timeout, this);
         this.network = network;
         this.numberOfMessages = numberOfMessages;
@@ -27,34 +26,22 @@ public class Urb implements Listener {
         this.pendingMessages = new HashSet<>();
         this.delivered = new HashSet<>();
         this.aliveProcesses = new HashSet<>();
+        this.fifo = fifo;
         this.f=f;
         //We add to the set of alive processes all known processes initially
         aliveProcesses.addAll(network.getProcessesInNetwork());
     }
 
-    public void sendMessages(){
-        ProcessDetails source = network.getProcessFromPort(socket.getLocalPort());
-            for (int i = 1; i <= numberOfMessages; ++i){
-                beb.addMessages(source, Integer.toString(i));
-                pendingMessages.add(new Tuple<>(Integer.toString(i), source));
-                try {
-                    f.write("b " + i + "\n");
-                    f.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            beb.sendMessages();
+
+    public void sendMessages(ProcessDetails source, String payload){
+                beb.addMessage(source, payload);
+                pendingMessages.add(new Tuple<>(payload, source));
+                beb.sendMessages();
     }
 
 
     public void deliver(Tuple<String, ProcessDetails> t){
-        try {
-            f.write("d "+ t.y.getId() +" "+ t.x + "\n");
-            f.flush();
-        } catch (IOException e) {
-//            e.printStackTrace();
-        }
+        fifo.callback(t);
     }
 
     public void checkToDeliver(){
@@ -89,7 +76,7 @@ public class Urb implements Listener {
     public void callback(Message m) {
         Tuple<String, ProcessDetails> t = new Tuple(m.getPayload(), m.getSource());
 //        System.out.println(m.getSender().getPort() + " -> " + port + " : beb - deliver = " + t.x + " : " + t.y.getId());
-        beb.addMessages(t.y, t.x);
+        beb.addMessage(t.y, t.x);
         //ADD ACK
         ProcessDetails localDetail = network.getProcessFromPort(beb.getSocket().getLocalPort());
         ProcessDetails sender = m.getSender();
@@ -106,9 +93,14 @@ public class Urb implements Listener {
         if (!pendingMessages.contains(t)){
             m.setSender(network.getProcessFromPort(socket.getLocalPort()));
             pendingMessages.add(t);
-            beb.addMessages(t.y, t.x);
+            beb.addMessage(t.y, t.x);
         }
         checkToDeliver();
+    }
+
+    @Override
+    public void callback(Tuple t) {
+
     }
 
     public void stop(){

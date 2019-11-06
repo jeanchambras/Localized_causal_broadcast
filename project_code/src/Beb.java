@@ -18,7 +18,7 @@ public class Beb implements Listener {
 
     }
 
-    public void addMessages(ProcessDetails source, String payload){
+    public void addMessage(ProcessDetails source, String payload){
 //        System.out.println(networkTopology.getProcessFromPort(socket.getLocalPort()).getPort() + ": broadcast " + payload + " from "+ source.getPort());
         ProcessDetails sender = networkTopology.getProcessFromPort(socket.getLocalPort());
         ArrayList<Message> messages = new ArrayList<>();
@@ -37,6 +37,10 @@ public class Beb implements Listener {
     public void callback(Message m) {
         deliver(m);
 
+    }
+
+    @Override
+    public void callback(Tuple t) {
     }
 
     public void deliver(Message m){

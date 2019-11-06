@@ -11,13 +11,13 @@ import java.util.ArrayList;
 public class Process{
     private DatagramSocket UDPinterface;
     private NetworkTopology network;
-    private Urb urb;
+    private FIFO fifo;
     private final int timeout;
     private File logfile;
     private FileWriter writer;
 
     public Process(int processReceivePort,int id, ArrayList<ProcessDetails> processesInNetwork, int numberOfMessages) throws SocketException {
-        this.timeout = 10;
+        this.timeout = 100;
         this.network = new NetworkTopology(processesInNetwork);
         this.UDPinterface = new DatagramSocket(processReceivePort);
         this.UDPinterface.setSoTimeout(timeout);
@@ -27,7 +27,7 @@ public class Process{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.urb = new Urb(UDPinterface, network, numberOfMessages, timeout, writer);
+        this.fifo = new FIFO(UDPinterface, numberOfMessages, timeout, writer, network);
         Process.SigHandlerIntTerm sigHandlerInt = new Process.SigHandlerIntTerm(this);
         Signal signalInt = new Signal("INT");
         Signal.handle(signalInt, sigHandlerInt);
@@ -41,7 +41,7 @@ public class Process{
     }
 
     public void startClient(){
-        urb.sendMessages();
+        fifo.sendMessages();
     }
 
     public static class SigHandlerIntTerm implements SignalHandler {
@@ -54,7 +54,7 @@ public class Process{
 
         @Override
         public void handle(Signal signal) {
-            p.urb.stop();
+            p.fifo.stop();
             try {
                 p.writer.close();
             } catch (IOException e) {
