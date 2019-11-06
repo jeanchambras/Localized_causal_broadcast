@@ -49,12 +49,11 @@ public class Urb implements Listener {
 
 
     public void deliver(Tuple<String, ProcessDetails> t){
-        System.out.println(port + " : URB-DELIVERED : " + t.x + " : " + t.y.getId());
         try {
             f.write("d "+ t.y.getId() +" "+ t.x + "\n");
             f.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
