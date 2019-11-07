@@ -82,9 +82,7 @@ public class PerfectLink {
                         = new DatagramPacket(buf, buf.length);
                 try {
                     socket.receive(UDPpacket);
-                } catch (SocketTimeoutException e) {
-                    continue;
-                } catch (SocketException e) {
+                } catch (SocketTimeoutException | SocketException e) {
                     continue;
                 } catch (IOException e) {
                     e.printStackTrace();

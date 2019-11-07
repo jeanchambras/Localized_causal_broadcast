@@ -1,4 +1,5 @@
 public class Tuple<X, Y> {
+
     public final X x;
     public final Y y;
 
@@ -6,6 +7,15 @@ public class Tuple<X, Y> {
         this.x = x;
         this.y = y;
     }
+
+    public Y getY() {
+        return y;
+    }
+
+    public X getX() {
+        return x;
+    }
+
 
     @Override
     public boolean equals(Object o) {

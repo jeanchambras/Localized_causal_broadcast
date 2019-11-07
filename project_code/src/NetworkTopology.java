@@ -21,4 +21,13 @@ public class NetworkTopology {
         }
         throw new ValueException("Not valid port number");
     }
+
+    public ProcessDetails getProcessFromId(int id){
+        for (ProcessDetails p : processesInNetwork) {
+            if (p.getId() == id) {
+                return p;
+            }
+        }
+        throw new ValueException("Not valid id");
+    }
 }
