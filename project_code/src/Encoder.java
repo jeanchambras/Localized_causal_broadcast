@@ -17,22 +17,22 @@ public class Encoder {
         b[2] = IntToByteArray(m.getDestination().getId())[0];
         b[3] = IntToByteArray(m.getSource().getId())[1];
         b[4] = IntToByteArray(m.getSource().getId())[0];
-        b[5] = IntToByteArray(m.getSender().getId())[1];
-        b[6] = IntToByteArray(m.getSender().getId())[0];
-        b[7] = IntToByteArray(Integer.parseInt(m.getPayload()))[1];
-        b[8] = IntToByteArray(Integer.parseInt(m.getPayload()))[0];
+        b[5] = IntToByteArray(Integer.parseInt(m.getPayload()))[1];
+        b[6] = IntToByteArray(Integer.parseInt(m.getPayload()))[0];
+        b[7] = IntToByteArray(m.getSender().getId())[1];
+        b[8] = IntToByteArray(m.getSender().getId())[0];
 
         return b;
     }
 
-    public Tuple<Integer, Message> decode (byte[] b){
+    public Tuple<Integer, Message> decode (byte[] b) throws Exception {
         int ack = ByteArrayToInt(new byte[] {b[0]});
         return new Tuple<>(ack, getMessage(b));
     }
 
 
     //todo checker l'ordre
-    private Message getMessage(byte[] b) {
+    private Message getMessage(byte[] b) throws Exception {
         ProcessDetails desti = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[2], b[1]}));
         ProcessDetails source = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[4], b[3]}));
         String payload = Integer.toString(ByteArrayToInt(new byte[] {b[6], b[5]}));

@@ -17,13 +17,13 @@ public class Process {
     private ProcessDetails sender;
     private FileWriter writer;
 
-    public Process(int processReceivePort, int id, ArrayList<ProcessDetails> processesInNetwork, int numberOfMessages) throws SocketException {
+    public Process(int processReceivePort, int id, ArrayList<ProcessDetails> processesInNetwork, int numberOfMessages) throws Exception {
         this.timeout = 10;
         this.network = new NetworkTopology(processesInNetwork);
         this.UDPinterface = new DatagramSocket(processReceivePort);
         this.UDPinterface.setSoTimeout(timeout);
         this.sender = network.getProcessFromId(id);
-        this.logfile = new File("./outfiles/da_proc_" + id + ".out");
+        this.logfile = new File("./da_proc_" + id + ".out");
         try {
             this.writer = new FileWriter(logfile, false);
         } catch (IOException e) {

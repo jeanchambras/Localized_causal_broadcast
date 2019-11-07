@@ -78,7 +78,12 @@ public class PerfectLink {
                     e.printStackTrace();
                 }
 
-                Tuple<Integer,Message> packet = encoder.decode(buf);
+                Tuple<Integer,Message> packet = null;
+                try {
+                    packet = encoder.decode(buf);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 if (packet.x == 1) {
                     messagesAcked.add(packet.y);

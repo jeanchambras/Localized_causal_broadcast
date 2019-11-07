@@ -10,7 +10,7 @@ public class FIFO implements Listener {
     private HashMap<ProcessDetails, Integer> nextMessageToDeliver;
     private HashSet<Tuple<String, ProcessDetails>> pending;
 
-    public FIFO(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, FileWriter f, NetworkTopology network) {
+    public FIFO(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, FileWriter f, NetworkTopology network) throws Exception {
         this.urb = new Urb(sender, socket, network, timeout, f, this);
         this.pending = new HashSet<>();
         this.nextMessageToDeliver = new HashMap<>();
@@ -58,7 +58,7 @@ public class FIFO implements Listener {
     public void deliver(Tuple<String, ProcessDetails> t) {
         try {
             f.write("d " + t.y.getId() + " " + t.x + "\n");
-            f.flush();gi
+            f.flush();
         } catch (IOException e) {}
     }
 

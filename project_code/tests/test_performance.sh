@@ -2,11 +2,10 @@
 
 evaluation_time=$1
 init_time=2
-numberOfmessages=6
-processes=8
+numberOfmessages=10
+processes=10
 
-rm -r outfiles
-mkdir outfiles
+rm *.out
 
 #start 5 processes
 for i in `seq 1 $processes`
@@ -44,7 +43,7 @@ let "l = $numberOfmessages + $numberOfmessages * $processes"
 echo "Log files should be ${l} lines long"
 for i in `seq 1 $processes`
 do
-  filename="./outfiles/da_proc_${i}.out"
+  filename="./da_proc_${i}.out"
   wc -l $filename
 done
 

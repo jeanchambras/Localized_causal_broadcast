@@ -1,5 +1,3 @@
-import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
-
 import java.util.ArrayList;
 
 public class NetworkTopology {
@@ -13,21 +11,21 @@ public class NetworkTopology {
         return processesInNetwork;
     }
 
-    public ProcessDetails getProcessFromPort(int port){
+    public ProcessDetails getProcessFromPort(int port) throws Exception {
         for (ProcessDetails p : processesInNetwork) {
             if (p.getPort() == port) {
                 return p;
             }
         }
-        throw new ValueException("Not valid port number");
+        throw new Exception("Not valid port number");
     }
 
-    public ProcessDetails getProcessFromId(int id){
+    public ProcessDetails getProcessFromId(int id) throws Exception {
         for (ProcessDetails p : processesInNetwork) {
             if (p.getId() == id) {
                 return p;
             }
         }
-        throw new ValueException("Not valid id");
+        throw new Exception("Not valid id");
     }
 }
