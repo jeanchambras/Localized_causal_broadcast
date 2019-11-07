@@ -8,7 +8,7 @@ public class Beb implements Listener {
     private DatagramSocket socket;
 
     public Beb(DatagramSocket socket, NetworkTopology network, int timeout, Listener urb) {
-        this.perfectLink = new PerfectLink(socket, timeout, this);
+        this.perfectLink = new PerfectLink(network, socket, timeout, this);
         this.networkTopology = network;
         this.socket = socket;
         this.urb = urb;

@@ -20,8 +20,9 @@ public class PerfectLink {
     private Sender sender;
     private int timeout;
     private Listener beb;
+    private Encoder encoder;
 
-    public PerfectLink(DatagramSocket socket, int timeout, Listener beb) {
+    public PerfectLink(NetworkTopology networkTopology, DatagramSocket socket, int timeout, Listener beb) {
         this.receivedMessages = new ArrayList<>();
         this.messagesToAck = new ArrayList<>();
         this.nextMessagesToAck = new ArrayList<>();
@@ -33,6 +34,7 @@ public class PerfectLink {
         this.beb = beb;
         this.server = new Server();
         this.sender = new Sender();
+        this.encoder = new Encoder(networkTopology);
         new Thread(server).start();
     }
 
@@ -44,14 +46,8 @@ public class PerfectLink {
         this.nextMessagesToSend.addAll(messagesToAdd);
     }
 
-    public void sendPacket(Packet p, ProcessDetails destination) {
-        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
-        ObjectOutput oo;
+    public void sendPacket(byte[] buf, ProcessDetails destination) {
         try {
-            oo = new ObjectOutputStream(bStream);
-            oo.writeObject(p);
-            oo.close();
-            byte[] buf = bStream.toByteArray();
             DatagramPacket packet;
             packet = new DatagramPacket(buf, buf.length, InetAddress.getByName(destination.getAddress()), destination.getPort());
             socket.send(packet);
@@ -75,8 +71,7 @@ public class PerfectLink {
         private AtomicBoolean running = new AtomicBoolean(true);
 
         public void run() {
-            byte[] buf = new byte[512];
-            Packet packet;
+            byte[] buf = new byte[9];
             while (running.get()) {
                 DatagramPacket UDPpacket
                         = new DatagramPacket(buf, buf.length);
@@ -87,24 +82,18 @@ public class PerfectLink {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                try {
-                    ObjectInputStream iStream;
-                    iStream = new ObjectInputStream(new ByteArrayInputStream(buf));
-                    packet = (Packet) iStream.readObject();
-                    iStream.close();
 
-                    if (packet.message == null && packet.ack != null) {
-                        messagesAcked.add(packet.ack.getMessage());
-                    } else if (packet.ack == null && packet.message != null) {
-                        Message message = packet.message;
-                        nextMessagesToAck.add(message);
-                        if (!receivedMessages.contains(message)) {
-                            deliver(message);
-                            receivedMessages.add(message);
-                        }
+                Tuple<Integer,Message> packet = encoder.decode(buf);
+
+                if (packet.x == 1) {
+                    messagesAcked.add(packet.y);
+                } else if (packet.x == 0) {
+                    Message message = packet.y;
+                    nextMessagesToAck.add(message);
+                    if (!receivedMessages.contains(message)) {
+                        deliver(message);
+                        receivedMessages.add(message);
                     }
-                } catch (IOException | ClassNotFoundException e) {
-                    e.printStackTrace();
                 }
             }
         }
@@ -122,9 +111,9 @@ public class PerfectLink {
                 if (!messagesToSend.isEmpty()) {
                     synchronized (messagesToSend) {
                         messagesToSend.forEach((Message m) -> {
-                            Packet p = new Packet(m);
                             if (!(m == null)) {
-                                sendPacket(p, m.getDestination());
+                                byte[] buf = encoder.encode(m);
+                                sendPacket(buf, m.getDestination());
                             } else {
                                 System.out.println("Null");
                             }
@@ -137,8 +126,8 @@ public class PerfectLink {
                     synchronized (messagesToAck) {
                         messagesToAck.forEach((Message m) -> {
                             Ack a = new Ack(m);
-                            Packet p = new Packet(a);
-                            sendPacket(p, m.getSender());
+                            byte[] buf = encoder.encode(a);
+                            sendPacket(buf, m.getSender());
                         });
                         messagesToAck.clear();
                     }
