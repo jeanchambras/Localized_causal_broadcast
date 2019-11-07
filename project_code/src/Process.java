@@ -8,7 +8,7 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 
-public class Process{
+public class Process {
     private DatagramSocket UDPinterface;
     private NetworkTopology network;
     private FIFO fifo;
@@ -16,14 +16,14 @@ public class Process{
     private File logfile;
     private FileWriter writer;
 
-    public Process(int processReceivePort,int id, ArrayList<ProcessDetails> processesInNetwork, int numberOfMessages) throws SocketException {
-        this.timeout = 100;
+    public Process(int processReceivePort, int id, ArrayList<ProcessDetails> processesInNetwork, int numberOfMessages) throws SocketException {
+        this.timeout = 500;
         this.network = new NetworkTopology(processesInNetwork);
         this.UDPinterface = new DatagramSocket(processReceivePort);
         this.UDPinterface.setSoTimeout(timeout);
-        this.logfile = new File("./outfiles/da_proc_"+id +".out");
+        this.logfile = new File("./outfiles/da_proc_" + id + ".out");
         try {
-            this.writer = new FileWriter(logfile,false);
+            this.writer = new FileWriter(logfile, false);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -40,7 +40,7 @@ public class Process{
         Signal.handle(signalUsr2, sigHandlerUsr2);
     }
 
-    public void startClient(){
+    public void startClient() {
         fifo.sendMessages();
     }
 
@@ -54,13 +54,12 @@ public class Process{
 
         @Override
         public void handle(Signal signal) {
-            p.fifo.stop();
             try {
                 p.writer.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
+            p.fifo.stop();
             p.UDPinterface.close();
             Thread.currentThread().interrupt();
         }

@@ -6,7 +6,6 @@ public class ProcessDetails implements Serializable {
     private int port;
     private int id;
 
-
     public ProcessDetails(int id, String address, int port) throws UnknownHostException {
         this.address = address;
         this.port = port;
@@ -39,6 +38,6 @@ public class ProcessDetails implements Serializable {
 
     @Override
     public int hashCode() {
-        return port * (id+7);
+        return port * (id + 7);
     }
 }

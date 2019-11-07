@@ -6,60 +6,42 @@ public class Beb implements Listener {
     private Listener urb;
     private NetworkTopology networkTopology;
     private DatagramSocket socket;
-    private ArrayList<Message> messages;
-    private ArrayList<Message> messagesToSend;
 
-    public Beb (DatagramSocket socket, NetworkTopology network, int numberOfMessages, int timeout, Listener urb){
+    public Beb(DatagramSocket socket, NetworkTopology network, int timeout, Listener urb) {
         this.perfectLink = new PerfectLink(socket, timeout, this);
         this.networkTopology = network;
         this.socket = socket;
         this.urb = urb;
-        this.messages = new ArrayList<>();
-
     }
 
-    public void addMessage(ProcessDetails source, String payload){
-//        System.out.println(networkTopology.getProcessFromPort(socket.getLocalPort()).getPort() + ": broadcast " + payload + " from "+ source.getPort());
+    public void addMessage(ProcessDetails source, String payload) {
         ProcessDetails sender = networkTopology.getProcessFromPort(socket.getLocalPort());
         ArrayList<Message> messages = new ArrayList<>();
         for (ProcessDetails destination : networkTopology.getProcessesInNetwork()) {
-                Message m = new Message(destination, source, payload, sender);
-                messages.add(m);
+            Message m = new Message(destination, source, payload, sender);
+            messages.add(m);
         }
         perfectLink.addMessagesToQueue(messages);
     }
 
-    public void sendMessages(){
+    public void sendMessages() {
         perfectLink.sendMessages();
     }
 
     @Override
     public void callback(Message m) {
         deliver(m);
-
     }
 
     @Override
     public void callback(Tuple t) {
     }
 
-    public void deliver(Message m){
+    public void deliver(Message m) {
         urb.callback(m);
     }
 
-    public NetworkTopology getNetworkTopology(){
-        return this.networkTopology;
-    }
-
-    public DatagramSocket getSocket(){
-        return this.socket;
-    }
-
-    public ArrayList<Message> getMessages(){
-        return  this.messages;
-    }
-
-    public void stop(){
+    public void stop() {
         perfectLink.stop();
     }
 }

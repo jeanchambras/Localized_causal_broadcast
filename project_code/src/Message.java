@@ -6,7 +6,7 @@ public class Message implements Serializable {
     private String payload;
     private ProcessDetails sender;
 
-    public Message(ProcessDetails destination, ProcessDetails source, String payload, ProcessDetails sender){
+    public Message(ProcessDetails destination, ProcessDetails source, String payload, ProcessDetails sender) {
         this.destination = destination;
         this.source = source;
         this.payload = payload;
@@ -33,8 +33,6 @@ public class Message implements Serializable {
         this.sender = sender;
     }
 
-    //public ProcessDetails getSender(){ return sender; }
-
     @Override
     public boolean equals(Object o) {
         if (o == this) {
@@ -44,7 +42,7 @@ public class Message implements Serializable {
             return false;
         }
         Message c = (Message) o;
-        return this.destination.equals(c.destination)&& this.source.equals(c.source) && this.payload.equals(c.payload) && this.sender.equals(c.sender);
+        return this.destination.equals(c.destination) && this.source.equals(c.source) && this.payload.equals(c.payload) && this.sender.equals(c.sender);
     }
 
     @Override

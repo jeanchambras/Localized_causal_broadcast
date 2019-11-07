@@ -6,11 +6,9 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PerfectLink {
-
     private ArrayList<Message> messagesToSend;
     private ArrayList<Message> nextMessagesToSend;
     private ArrayList<Message> messagesToAck;
@@ -23,7 +21,7 @@ public class PerfectLink {
     private int timeout;
     private Listener beb;
 
-    public PerfectLink(DatagramSocket socket, int timeout, Listener beb){
+    public PerfectLink(DatagramSocket socket, int timeout, Listener beb) {
         this.receivedMessages = new ArrayList<>();
         this.messagesToAck = new ArrayList<>();
         this.nextMessagesToAck = new ArrayList<>();
@@ -33,13 +31,12 @@ public class PerfectLink {
         this.socket = socket;
         this.timeout = timeout;
         this.beb = beb;
-        // start a thread that listen for incoming packets
         this.server = new Server();
         this.sender = new Sender();
         new Thread(server).start();
     }
-    // TODO start a thread that starts to send messages -> we should handle USR2 signal before starting to send
-    public void sendMessages(){
+
+    public void sendMessages() {
         new Thread(sender).start();
     }
 
@@ -47,7 +44,7 @@ public class PerfectLink {
         this.nextMessagesToSend.addAll(messagesToAdd);
     }
 
-    public void sendPacket(Packet p, ProcessDetails destination){
+    public void sendPacket(Packet p, ProcessDetails destination) {
         ByteArrayOutputStream bStream = new ByteArrayOutputStream();
         ObjectOutput oo;
         try {
@@ -58,9 +55,9 @@ public class PerfectLink {
             DatagramPacket packet;
             packet = new DatagramPacket(buf, buf.length, InetAddress.getByName(destination.getAddress()), destination.getPort());
             socket.send(packet);
-        }catch (SocketException e){
+        } catch (SocketException e) {
 
-        }  catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -69,13 +66,14 @@ public class PerfectLink {
         beb.callback(received);
     }
 
-    public void stop(){
+    public void stop() {
         server.stopServer();
         sender.stopSender();
     }
 
     public class Server implements Runnable {
         private AtomicBoolean running = new AtomicBoolean(true);
+
         public void run() {
             byte[] buf = new byte[512];
             Packet packet;
@@ -86,9 +84,9 @@ public class PerfectLink {
                     socket.receive(UDPpacket);
                 } catch (SocketTimeoutException e) {
                     continue;
-                } catch (SocketException e){
+                } catch (SocketException e) {
                     continue;
-                } catch (IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
                 try {
@@ -97,79 +95,80 @@ public class PerfectLink {
                     packet = (Packet) iStream.readObject();
                     iStream.close();
 
-                if (packet.message == null && packet.ack != null){
-                    messagesAcked.add(packet.ack.getMessage());
-                } else if (packet.ack == null && packet.message != null) {
-                    Message message = packet.message;
-                    nextMessagesToAck.add(message);
-                    if (!receivedMessages.contains(message)) {
-                        deliver(message);
-                        receivedMessages.add(message);
+                    if (packet.message == null && packet.ack != null) {
+                        messagesAcked.add(packet.ack.getMessage());
+                    } else if (packet.ack == null && packet.message != null) {
+                        Message message = packet.message;
+                        nextMessagesToAck.add(message);
+                        if (!receivedMessages.contains(message)) {
+                            deliver(message);
+                            receivedMessages.add(message);
+                        }
                     }
-                }
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }
         }
-        public void stopServer(){
+
+        public void stopServer() {
             running.set(false);
         }
     }
 
     public class Sender implements Runnable {
-            private  AtomicBoolean running = new AtomicBoolean(true);
-            public void run() {
-                while(running.get()){
-                    if(!messagesToSend.isEmpty()){
-                        synchronized(messagesToSend)
-                        {
-                            messagesToSend.forEach((Message m) -> {
-                                Packet p = new Packet(m);
-                                if(!(m == null)){
-                                    sendPacket(p, m.getDestination());
-                                } else {
-                                    System.out.println("Null");
-                                }
-                            });
-                        }
+        private AtomicBoolean running = new AtomicBoolean(true);
 
+        public void run() {
+            while (running.get()) {
+                if (!messagesToSend.isEmpty()) {
+                    synchronized (messagesToSend) {
+                        messagesToSend.forEach((Message m) -> {
+                            Packet p = new Packet(m);
+                            if (!(m == null)) {
+                                sendPacket(p, m.getDestination());
+                            } else {
+                                System.out.println("Null");
+                            }
+                        });
                     }
 
-                    if(!messagesToAck.isEmpty()){
-                        synchronized(messagesToAck)
-                        {
-                            messagesToAck.forEach((Message m)->{
-                                Ack a = new Ack(m);
-                                Packet p = new Packet(a);
-                                sendPacket(p, m.getSender());
-                            });
-                            messagesToAck.clear();
-                        }
-                    }
+                }
 
-                    if(!nextMessagesToAck.isEmpty()){
-                        messagesToAck.addAll(nextMessagesToAck);
-                        nextMessagesToAck.clear();
-                    }
-                    if (!nextMessagesToSend.isEmpty()) {
-                        messagesToSend.addAll(nextMessagesToSend);
-                        nextMessagesToSend.clear();
-                    }
-                    if (!messagesAcked.isEmpty()) {
-                        messagesToSend.removeAll(messagesAcked);
-                        messagesAcked.clear();
-                    }
-                    try {
-                        Thread.sleep(timeout);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                if (!messagesToAck.isEmpty()) {
+                    synchronized (messagesToAck) {
+                        messagesToAck.forEach((Message m) -> {
+                            Ack a = new Ack(m);
+                            Packet p = new Packet(a);
+                            sendPacket(p, m.getSender());
+                        });
+                        messagesToAck.clear();
                     }
                 }
+
+                if (!nextMessagesToAck.isEmpty()) {
+                    messagesToAck.addAll(nextMessagesToAck);
+                    nextMessagesToAck.clear();
+                }
+                if (!nextMessagesToSend.isEmpty()) {
+                    messagesToSend.addAll(nextMessagesToSend);
+                    nextMessagesToSend.clear();
+                }
+                if (!messagesAcked.isEmpty()) {
+                    messagesToSend.removeAll(messagesAcked);
+                    messagesAcked.clear();
+                }
+                try {
+                    Thread.sleep(timeout);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-            public void stopSender(){
-                running.set(false);
-            }
+        }
+
+        public void stopSender() {
+            running.set(false);
+        }
 
     }
 }
