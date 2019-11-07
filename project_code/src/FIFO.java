@@ -50,17 +50,29 @@ public class FIFO implements Listener {
     @Override
     public void callback(Tuple<String,ProcessDetails> t) {
         pending.add(t);
-        Iterator<Tuple<String, ProcessDetails>> it = pending.iterator();
-        while(it.hasNext()){
-            Tuple<String,ProcessDetails> ts = it.next();
-            if (nextMessageToDeliver.get(ts.y) == Integer.parseInt(ts.x)){
+
+            Tuple<String, ProcessDetails> ts;
+            do {
+            ts = pending.stream().filter(o -> nextMessageToDeliver.get(o.y) == Integer.parseInt(o.x)).findAny().orElse(null);
+            if (!(ts == null)){
                 deliver(ts);
                 int next = nextMessageToDeliver.get(ts.y);
                 next++;
                 nextMessageToDeliver.put(ts.y,next);
-                it.remove();
+                pending.remove(ts);
             }
-        }
+            } while(!(ts == null));
+//        Iterator<Tuple<String, ProcessDetails>> it = pending.iterator();
+//        while(it.hasNext()){
+//            Tuple<String,ProcessDetails> ts = it.next();
+//            if (nextMessageToDeliver.get(ts.y) == Integer.parseInt(ts.x)){
+//                deliver(ts);
+//                int next = nextMessageToDeliver.get(ts.y);
+//                next++;
+//                nextMessageToDeliver.put(ts.y,next);
+//                it.remove();
+//            }
+//        }
     }
 
     public void deliver(Tuple<String, ProcessDetails> t){
