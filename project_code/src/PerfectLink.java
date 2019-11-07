@@ -1,9 +1,4 @@
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -114,8 +109,6 @@ public class PerfectLink {
                             if (!(m == null)) {
                                 byte[] buf = encoder.encode(m);
                                 sendPacket(buf, m.getDestination());
-                            } else {
-                                System.out.println("Null");
                             }
                         });
                     }

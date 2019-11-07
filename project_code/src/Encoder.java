@@ -39,15 +39,6 @@ public class Encoder {
         return b;
     }
 
-    /*
-    if(decode(byte).getX() == 0){
-        Message m = decode(byte).getY()
-    }
-    else {
-        Ack a = new Ack(decode(byte).getY());
-    }
-     */
-
     public Tuple<Integer, Message> decode (byte[] b){
         int ack = ByteArrayToInt(new byte[] {b[0]});
         return new Tuple<>(ack, getMessage(b));

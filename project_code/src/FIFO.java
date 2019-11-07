@@ -59,9 +59,7 @@ public class FIFO implements Listener {
         try {
             f.write("d " + t.y.getId() + " " + t.x + "\n");
             f.flush();
-        } catch (IOException e) {
-            System.out.println("the Filewriter is closed");
-        }
+        } catch (IOException e) {}
     }
 
     public void stop() {
