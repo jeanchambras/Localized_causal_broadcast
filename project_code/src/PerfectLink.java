@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketTimeoutException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,7 +58,9 @@ public class PerfectLink {
             DatagramPacket packet;
             packet = new DatagramPacket(buf, buf.length, InetAddress.getByName(destination.getAddress()), destination.getPort());
             socket.send(packet);
-        } catch (IOException e) {
+        }catch (SocketException e){
+
+        }  catch(IOException e) {
             e.printStackTrace();
         }
     }
@@ -86,6 +85,8 @@ public class PerfectLink {
                 try {
                     socket.receive(UDPpacket);
                 } catch (SocketTimeoutException e) {
+                    continue;
+                } catch (SocketException e){
                     continue;
                 } catch (IOException e){
                     e.printStackTrace();
@@ -125,7 +126,11 @@ public class PerfectLink {
                         {
                             messagesToSend.forEach((Message m) -> {
                                 Packet p = new Packet(m);
-                                sendPacket(p, m.getDestination());
+                                if(!(m == null)){
+                                    sendPacket(p, m.getDestination());
+                                } else {
+                                    System.out.println("Null");
+                                }
                             });
                         }
 
