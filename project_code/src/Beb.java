@@ -5,17 +5,15 @@ public class Beb implements Listener {
     private PerfectLink perfectLink;
     private Listener urb;
     private NetworkTopology networkTopology;
-    private DatagramSocket socket;
-
-    public Beb(DatagramSocket socket, NetworkTopology network, int timeout, Listener urb) {
+    private ProcessDetails sender;
+    public Beb(ProcessDetails sender, DatagramSocket socket, NetworkTopology network, int timeout, Listener urb) {
         this.perfectLink = new PerfectLink(network, socket, timeout, this);
         this.networkTopology = network;
-        this.socket = socket;
         this.urb = urb;
+        this.sender = sender;
     }
 
     public void addMessage(ProcessDetails source, String payload) {
-        ProcessDetails sender = networkTopology.getProcessFromPort(socket.getLocalPort());
         ArrayList<Message> messages = new ArrayList<>();
         for (ProcessDetails destination : networkTopology.getProcessesInNetwork()) {
             Message m = new Message(destination, source, payload, sender);

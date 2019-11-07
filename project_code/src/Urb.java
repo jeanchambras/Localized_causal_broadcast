@@ -9,14 +9,12 @@ public class Urb implements Listener {
     private HashSet<Tuple<String, ProcessDetails>> delivered;
     private HashSet<ProcessDetails> aliveProcesses;
     private HashMap<Tuple<String, ProcessDetails>, Set<ProcessDetails>> ackedMessages;
-    private DatagramSocket socket;
     private Listener fifo;
 
 
-    public Urb(DatagramSocket socket, NetworkTopology network, int timeout, FileWriter f, Listener fifo) {
-        this.beb = new Beb(socket, network, timeout, this);
+    public Urb(ProcessDetails sender, DatagramSocket socket, NetworkTopology network, int timeout, FileWriter f, Listener fifo) {
+        this.beb = new Beb(sender, socket, network, timeout, this);
         this.network = network;
-        this.socket = socket;
         this.ackedMessages = new HashMap<>();
         this.pendingMessages = new HashSet<>();
         this.delivered = new HashSet<>();
@@ -34,9 +32,7 @@ public class Urb implements Listener {
     public void addMessages(ProcessDetails source, String payload) {
         pendingMessages.add(new Tuple<>(payload, source));
         beb.addMessage(source, payload);
-
     }
-
 
     public void deliver(Tuple<String, ProcessDetails> t) {
         fifo.callback(t);
@@ -50,7 +46,6 @@ public class Urb implements Listener {
                 delivered.add(t);
                 it.remove();
                 deliver(t);
-
             }
         }
     }
@@ -61,7 +56,6 @@ public class Urb implements Listener {
             int numberAcked = ackedMessages.get(t).size();
             return 2 * numberAcked >= N;
         }
-
         return false;
     }
 
@@ -81,7 +75,7 @@ public class Urb implements Listener {
 
         //CHECK PENDING
         if (!pendingMessages.contains(t)) {
-            m.setSender(network.getProcessFromPort(socket.getLocalPort()));
+            m.setSender(sender);
             pendingMessages.add(t);
             beb.addMessage(t.y, t.x);
         }

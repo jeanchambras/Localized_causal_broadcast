@@ -7,26 +7,12 @@ public class Encoder {
         this.nT = networkTopology;
     }
 
-    public byte[] encode (Message m ) {
+    public byte[] encode (boolean ack, Message m) {
         byte[] b = new byte[9];
-        b[0] = 0;
-        b[1] = IntToByteArray(m.getDestination().getId())[1];
-        b[2] = IntToByteArray(m.getDestination().getId())[0];
-        b[3] = IntToByteArray(m.getSource().getId())[1];
-        b[4] = IntToByteArray(m.getSource().getId())[0];
-        b[5] = IntToByteArray(m.getSender().getId())[1];
-        b[6] = IntToByteArray(m.getSender().getId())[0];
-        b[7] = IntToByteArray(Integer.parseInt(m.getPayload()))[1];
-        b[8] = IntToByteArray(Integer.parseInt(m.getPayload()))[0];
-
-        return b;
-    }
-
-    public byte[] encode (Ack a ) {
-        Message m = a.getMessage();
-        byte[] b = new byte[9];
-
-        b[0] = 1;
+        if (ack)
+            b[0] = 1;
+        else
+            b[1] = 0;
         b[1] = IntToByteArray(m.getDestination().getId())[1];
         b[2] = IntToByteArray(m.getDestination().getId())[0];
         b[3] = IntToByteArray(m.getSource().getId())[1];

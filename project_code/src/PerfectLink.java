@@ -107,7 +107,7 @@ public class PerfectLink {
                     synchronized (messagesToSend) {
                         messagesToSend.forEach((Message m) -> {
                             if (!(m == null)) {
-                                byte[] buf = encoder.encode(m);
+                                byte[] buf = encoder.encode(false, m);
                                 sendPacket(buf, m.getDestination());
                             }
                         });
@@ -118,8 +118,7 @@ public class PerfectLink {
                 if (!messagesToAck.isEmpty()) {
                     synchronized (messagesToAck) {
                         messagesToAck.forEach((Message m) -> {
-                            Ack a = new Ack(m);
-                            byte[] buf = encoder.encode(a);
+                            byte[] buf = encoder.encode(true,m);
                             sendPacket(buf, m.getSender());
                         });
                         messagesToAck.clear();
