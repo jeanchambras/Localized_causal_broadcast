@@ -2,6 +2,10 @@ import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
 
+/**
+ * The PerfectLink class defines the perfect link algorithm as well as handling the network reading and writing. 
+ */
+
 public class PerfectLink {
     private ArrayList<Message> messagesToSend;
     private ArrayList<Message> nextMessagesToSend;
