@@ -6,7 +6,7 @@ public class ProcessDetails implements Serializable {
     private int port;
     private int id;
 
-    public ProcessDetails(int id, String address, int port) throws UnknownHostException {
+    public ProcessDetails(int id, String address, int port) {
         this.address = address;
         this.port = port;
         this.id = id;

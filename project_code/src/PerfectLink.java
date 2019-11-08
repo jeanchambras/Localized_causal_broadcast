@@ -77,10 +77,10 @@ public class PerfectLink {
                     e.printStackTrace();
                 }
 
-                if (packet.x == 1) {
-                    messagesAcked.add(packet.y);
-                } else if (packet.x == 0) {
-                    Message message = packet.y;
+                if (packet.getX() == 1) {
+                    messagesAcked.add(packet.getY());
+                } else if (packet.getX() == 0) {
+                    Message message = packet.getY();
                     nextMessagesToAck.add(message);
                     if (!receivedMessages.contains(message)) {
                         deliver(message);

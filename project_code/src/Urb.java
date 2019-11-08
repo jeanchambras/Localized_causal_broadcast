@@ -40,7 +40,9 @@ public class Urb implements Listener {
 
     public void checkToDeliver() {
         Iterator<Tuple<String, ProcessDetails>> it = pendingMessages.iterator();
+        ////
         while (it.hasNext()) {
+            /////
             Tuple<String, ProcessDetails> t = it.next();
             if (pendingMessages.contains(t) && canDeliver(t) && !delivered.contains(t)) {
                 delivered.add(t);
@@ -56,13 +58,14 @@ public class Urb implements Listener {
             int numberAcked = ackedMessages.get(t).size();
             return 2 * numberAcked >= N;
         }
+
         return false;
     }
 
     @Override
     public void callback(Message m) {
         Tuple<String, ProcessDetails> t = new Tuple<>(m.getPayload(), m.getSource());
-        beb.addMessage(t.y, t.x);
+        beb.addMessage(t.getY(), t.getX());
         ProcessDetails sender = m.getSender();
 
         if (!ackedMessages.containsKey(t)) {
@@ -77,7 +80,7 @@ public class Urb implements Listener {
         if (!pendingMessages.contains(t)) {
             m.setSender(sender);
             pendingMessages.add(t);
-            beb.addMessage(t.y, t.x);
+            beb.addMessage(t.getY(), t.getX());
         }
         checkToDeliver();
     }
