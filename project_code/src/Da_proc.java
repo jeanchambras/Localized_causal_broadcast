@@ -1,6 +1,9 @@
 import java.io.*;
 import java.util.*;
 
+/** Da_proc is the main process, the application starts here. It reads the membership file and creates a new Process
+ */
+
 public class Da_proc {
     public static void main(String[] args) {
 

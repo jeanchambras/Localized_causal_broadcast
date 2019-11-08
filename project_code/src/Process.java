@@ -8,6 +8,11 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 
+
+/** Process is the actual process of the application. It monitors the different signals and defines the network interface.
+ *
+ */
+
 public class Process {
     private DatagramSocket UDPinterface;
     private NetworkTopology network;

@@ -4,6 +4,11 @@ import java.net.DatagramSocket;
 import java.util.HashMap;
 import java.util.HashSet;
 
+
+/** FIFO implements the FIFO algorithm by using the URB algorithm lower in the stack. It also writes the expected output to a log file.
+ *
+ */
+
 public class FIFO implements Listener {
     private Urb urb;
     private FileWriter f;
