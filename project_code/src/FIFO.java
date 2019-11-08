@@ -62,7 +62,5 @@ public class FIFO implements Listener {
         } catch (IOException e) {}
     }
 
-    public void stop() {
-        urb.stop();
-    }
+
 }

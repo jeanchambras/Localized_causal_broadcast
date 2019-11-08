@@ -1,7 +1,6 @@
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PerfectLink {
     private ArrayList<Message> messagesToSend;
@@ -57,17 +56,10 @@ public class PerfectLink {
         beb.callback(received);
     }
 
-    public void stop() {
-        server.stopServer();
-        sender.stopSender();
-    }
-
     public class Server implements Runnable {
-        private AtomicBoolean running = new AtomicBoolean(true);
-
         public void run() {
             byte[] buf = new byte[9];
-            while (running.get()) {
+            while (true) {
                 DatagramPacket UDPpacket
                         = new DatagramPacket(buf, buf.length);
                 try {
@@ -97,17 +89,11 @@ public class PerfectLink {
                 }
             }
         }
-
-        public void stopServer() {
-            running.set(false);
-        }
     }
 
     public class Sender implements Runnable {
-        private AtomicBoolean running = new AtomicBoolean(true);
-
         public void run() {
-            while (running.get()) {
+            while (true) {
                 if (!messagesToSend.isEmpty()) {
                     synchronized (messagesToSend) {
                         messagesToSend.forEach((Message m) -> {
@@ -117,7 +103,6 @@ public class PerfectLink {
                             }
                         });
                     }
-
                 }
 
                 if (!messagesToAck.isEmpty()) {
@@ -149,10 +134,5 @@ public class PerfectLink {
                 }
             }
         }
-
-        public void stopSender() {
-            running.set(false);
-        }
-
     }
 }

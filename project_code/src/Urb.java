@@ -86,7 +86,4 @@ public class Urb implements Listener {
     public void callback(Tuple t) {
     }
 
-    public void stop() {
-        beb.stop();
-    }
 }

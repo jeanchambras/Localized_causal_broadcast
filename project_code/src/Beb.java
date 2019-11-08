@@ -38,8 +38,4 @@ public class Beb implements Listener {
     public void deliver(Message m) {
         urb.callback(m);
     }
-
-    public void stop() {
-        perfectLink.stop();
-    }
 }

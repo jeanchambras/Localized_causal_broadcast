@@ -61,9 +61,7 @@ public class Process {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            p.fifo.stop();
-            p.UDPinterface.close();
-            Thread.currentThread().interrupt();
+            System.exit(-1);
         }
     }
 
