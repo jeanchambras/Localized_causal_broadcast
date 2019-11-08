@@ -45,6 +45,7 @@ public class FIFO implements Listener {
 
     @Override
     public void callback(Tuple<String, ProcessDetails> t) {
+        // System.out.println(pending.size());
         pending.add(t);
 
         Tuple<String, ProcessDetails> ts;

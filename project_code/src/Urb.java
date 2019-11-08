@@ -45,18 +45,16 @@ public class Urb implements Listener {
     }
 
     public void checkToDeliver() {
-        Iterator<Tuple<String, ProcessDetails>> it = pendingMessages.iterator();
-        ////
-        while (it.hasNext()) {
-            /////
-            Tuple<String, ProcessDetails> t = it.next();
-            if (pendingMessages.contains(t) && canDeliver(t) && !delivered.contains(t)) {
-                delivered.add(t);
-                it.remove();
-                deliver(t);
-            }
+            Tuple<String, ProcessDetails> ts;
+            do {
+                ts = pendingMessages.stream().filter(t-> canDeliver(t) && !delivered.contains(t)).findAny().orElse(null);
+                if (!(ts == null)) {
+                    delivered.add(ts);
+                    pendingMessages.remove(ts);
+                    deliver(ts);
+                }
+            } while (!(ts == null));
         }
-    }
 
     public boolean canDeliver(Tuple<String, ProcessDetails> t) {
         int N = network.getProcessesInNetwork().size();

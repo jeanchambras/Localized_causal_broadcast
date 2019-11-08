@@ -48,7 +48,6 @@ public class Message implements Serializable {
             return false;
         }
         Message c = (Message) o;
-        System.out.println();
         return this.destination.equals(c.destination) && this.source.equals(c.source) && this.payload.equals(c.payload) && this.sender.equals(c.sender);
     }
 
