@@ -19,3 +19,5 @@ To test the code for the first submission
         ./validate.sh FIFO JAVA
         
 4. done
+
+> note that the validate script simulate loss and delays in the network configuration (sudo required). Better to test inside the VM
