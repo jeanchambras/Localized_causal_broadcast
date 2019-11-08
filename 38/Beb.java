@@ -1,6 +1,15 @@
 import java.net.DatagramSocket;
 import java.util.ArrayList;
 
+
+
+/**
+ * BEB class defines the BEB algorithm. Like every algorithm in the stack it has the sendMessages and deliver functions which corresponds to the Broadcast and Deliver functions of the algorithms.
+ * The deliver function always calls the corresponding function above in the abstraction stack.
+ *
+ */
+
+
 public class Beb implements Listener {
     private PerfectLink perfectLink;
     private Listener urb;

@@ -1,5 +1,10 @@
 import java.util.ArrayList;
 
+/**
+ * NetworkTopology class defines the network topology, an array list of Process details.
+ */
+
+
 public class NetworkTopology {
     private ArrayList<ProcessDetails> processesInNetwork;
 

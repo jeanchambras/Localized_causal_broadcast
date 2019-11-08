@@ -2,6 +2,10 @@ import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
 
+/**
+ * The PerfectLink class defines the perfect link algorithm as well as handling the network reading and writing. 
+ */
+
 public class PerfectLink {
     private ArrayList<Message> messagesToSend;
     private ArrayList<Message> nextMessagesToSend;
@@ -64,7 +68,7 @@ public class PerfectLink {
                         = new DatagramPacket(buf, buf.length);
                 try {
                     socket.receive(UDPpacket);
-                } catch (SocketTimeoutException | SocketException e) {
+                } catch ( SocketException e) {
                     continue;
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -77,10 +81,10 @@ public class PerfectLink {
                     e.printStackTrace();
                 }
 
-                if (packet.x == 1) {
-                    messagesAcked.add(packet.y);
-                } else if (packet.x == 0) {
-                    Message message = packet.y;
+                if (packet.getX() == 1) {
+                    messagesAcked.add(packet.getY());
+                } else if (packet.getX() == 0) {
+                    Message message = packet.getY();
                     nextMessagesToAck.add(message);
                     if (!receivedMessages.contains(message)) {
                         deliver(message);

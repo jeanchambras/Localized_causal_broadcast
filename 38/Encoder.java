@@ -1,5 +1,10 @@
 import java.math.BigInteger;
 
+/**
+ * The encoder class defines an encoder and decoder for the message object. To reduce network traffic instead of sending the full Message object we serialize its information into a 9 bytes
+ * ByteArray. Made by Léo Bouraux, designed by Jean Chambras.
+ */
+
 public class Encoder {
     NetworkTopology nT;
 

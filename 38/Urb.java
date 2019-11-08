@@ -2,6 +2,12 @@ import java.io.FileWriter;
 import java.net.DatagramSocket;
 import java.util.*;
 
+/**
+ * URB class defines the URB algorithm. Like every algorithm in the stack it has the sendMessages and deliver functions which corresponds to the Broadcast and Deliver functions of the algorithms.
+ * The deliver function always calls the corresponding function above in the abstraction stack.
+ */
+
+
 public class Urb implements Listener {
     private Beb beb;
     private NetworkTopology network;
@@ -39,16 +45,16 @@ public class Urb implements Listener {
     }
 
     public void checkToDeliver() {
-        Iterator<Tuple<String, ProcessDetails>> it = pendingMessages.iterator();
-        while (it.hasNext()) {
-            Tuple<String, ProcessDetails> t = it.next();
-            if (pendingMessages.contains(t) && canDeliver(t) && !delivered.contains(t)) {
-                delivered.add(t);
-                it.remove();
-                deliver(t);
-            }
+            Tuple<String, ProcessDetails> ts;
+            do {
+                ts = pendingMessages.stream().filter(t-> canDeliver(t) && !delivered.contains(t)).findAny().orElse(null);
+                if (!(ts == null)) {
+                    delivered.add(ts);
+                    pendingMessages.remove(ts);
+                    deliver(ts);
+                }
+            } while (!(ts == null));
         }
-    }
 
     public boolean canDeliver(Tuple<String, ProcessDetails> t) {
         int N = network.getProcessesInNetwork().size();
@@ -56,13 +62,14 @@ public class Urb implements Listener {
             int numberAcked = ackedMessages.get(t).size();
             return 2 * numberAcked >= N;
         }
+
         return false;
     }
 
     @Override
     public void callback(Message m) {
         Tuple<String, ProcessDetails> t = new Tuple<>(m.getPayload(), m.getSource());
-        beb.addMessage(t.y, t.x);
+        beb.addMessage(t.getY(), t.getX());
         ProcessDetails sender = m.getSender();
 
         if (!ackedMessages.containsKey(t)) {
@@ -77,7 +84,7 @@ public class Urb implements Listener {
         if (!pendingMessages.contains(t)) {
             m.setSender(sender);
             pendingMessages.add(t);
-            beb.addMessage(t.y, t.x);
+            beb.addMessage(t.getY(), t.getX());
         }
         checkToDeliver();
     }
