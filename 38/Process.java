@@ -8,6 +8,11 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
 
+
+/** Process is the actual process of the application. It monitors the different signals and defines the network interface.
+ *
+ */
+
 public class Process {
     private DatagramSocket UDPinterface;
     private NetworkTopology network;
@@ -21,7 +26,6 @@ public class Process {
         this.timeout = 10;
         this.network = new NetworkTopology(processesInNetwork);
         this.UDPinterface = new DatagramSocket(processReceivePort);
-        this.UDPinterface.setSoTimeout(timeout);
         this.sender = network.getProcessFromId(id);
         this.logfile = new File("./da_proc_" + id + ".out");
         try {

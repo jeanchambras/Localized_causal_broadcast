@@ -4,6 +4,11 @@ import java.net.DatagramSocket;
 import java.util.HashMap;
 import java.util.HashSet;
 
+
+/** FIFO implements the FIFO algorithm by using the URB algorithm lower in the stack. It also writes the expected output to a log file.
+ *
+ */
+
 public class FIFO implements Listener {
     private Urb urb;
     private FileWriter f;
@@ -40,16 +45,17 @@ public class FIFO implements Listener {
 
     @Override
     public void callback(Tuple<String, ProcessDetails> t) {
+        // System.out.println(pending.size());
         pending.add(t);
 
         Tuple<String, ProcessDetails> ts;
         do {
-            ts = pending.stream().filter(o -> nextMessageToDeliver.get(o.y) == Integer.parseInt(o.x)).findAny().orElse(null);
+            ts = pending.stream().filter(o -> nextMessageToDeliver.get(o.getY()) == Integer.parseInt(o.getX())).findAny().orElse(null);
             if (!(ts == null)) {
                 deliver(ts);
-                int next = nextMessageToDeliver.get(ts.y);
+                int next = nextMessageToDeliver.get(ts.getY());
                 next++;
-                nextMessageToDeliver.put(ts.y, next);
+                nextMessageToDeliver.put(ts.getY(), next);
                 pending.remove(ts);
             }
         } while (!(ts == null));
@@ -57,7 +63,7 @@ public class FIFO implements Listener {
 
     public void deliver(Tuple<String, ProcessDetails> t) {
         try {
-            f.write("d " + t.y.getId() + " " + t.x + "\n");
+            f.write("d " + t.getY().getId() + " " + t.getX() + "\n");
             f.flush();
         } catch (IOException e) {}
     }

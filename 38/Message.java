@@ -1,5 +1,11 @@
 import java.io.Serializable;
 
+
+/**
+ * The message class defines a message that is sent between different processes. It contains the field destination, source (original sender) and sender (the address of the process which forwarded the message).
+ *
+ */
+
 public class Message implements Serializable {
     private ProcessDetails destination;
     private ProcessDetails source;
