@@ -25,7 +25,7 @@ public class Beb implements Listener {
     public void addMessage(ProcessDetails source, String payload) {
         ArrayList<Message> messages = new ArrayList<>();
         for (ProcessDetails destination : networkTopology.getProcessesInNetwork()) {
-            Message m = new Message(destination, source, payload, sender);
+            Message m = new Message(destination, source, payload, sender, networkTopology);
             messages.add(m);
         }
         perfectLink.addMessagesToQueue(messages);

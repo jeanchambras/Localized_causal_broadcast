@@ -42,7 +42,7 @@ public class Encoder {
         ProcessDetails source = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[4], b[3]}));
         String payload = Integer.toString(ByteArrayToInt(new byte[] {b[6], b[5]}));
         ProcessDetails sender = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[8], b[7]}));
-        return new Message(desti, source, payload, sender);
+        return new Message(desti, source, payload, sender, nT);
     }
 
     private byte[] IntToByteArray( int data ) {
