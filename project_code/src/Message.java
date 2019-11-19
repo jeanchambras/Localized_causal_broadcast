@@ -19,7 +19,7 @@ public class Message implements Serializable {
         this.source = source;
         this.payload = payload;
         this.sender = sender;
-        //this.vectorClock = new VectorClock(networkTopology);
+        this.vectorClock = new VectorClock(networkTopology);
     }
 
     public String getPayload() {

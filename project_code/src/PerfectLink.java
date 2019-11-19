@@ -1,6 +1,12 @@
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * The PerfectLink class defines the perfect link algorithm as well as handling the network reading and writing. 
@@ -44,8 +50,15 @@ public class PerfectLink {
         this.nextMessagesToSend.addAll(messagesToAdd);
     }
 
-    public void sendPacket(byte[] buf, ProcessDetails destination) {
+
+    public void sendPacket(Packet p, ProcessDetails destination) {
+        ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+        ObjectOutput oo;
         try {
+            oo = new ObjectOutputStream(bStream);
+            oo.writeObject(p);
+            oo.close();
+            byte[] buf = bStream.toByteArray();
             DatagramPacket packet;
             packet = new DatagramPacket(buf, buf.length, InetAddress.getByName(destination.getAddress()), destination.getPort());
             socket.send(packet);
@@ -62,38 +75,43 @@ public class PerfectLink {
 
     public class Server implements Runnable {
         public void run() {
-            byte[] buf = new byte[9];
+            byte[] buf = new byte[512];
+            Packet packet;
             while (true) {
                 DatagramPacket UDPpacket
                         = new DatagramPacket(buf, buf.length);
                 try {
                     socket.receive(UDPpacket);
-                } catch ( SocketException e) {
+                } catch (SocketTimeoutException e) {
+                    continue;
+                } catch (SocketException e) {
                     continue;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-                Tuple<Integer,Message> packet = null;
                 try {
-                    packet = encoder.decode(buf);
-                } catch (Exception e) {
+                    ObjectInputStream iStream;
+                    iStream = new ObjectInputStream(new ByteArrayInputStream(buf));
+                    packet = (Packet) iStream.readObject();
+                    iStream.close();
+
+                    if (packet.message == null && packet.ack != null) {
+                        messagesAcked.add(packet.ack.getMessage());
+                    } else if (packet.ack == null && packet.message != null) {
+                        Message message = packet.message;
+                        nextMessagesToAck.add(message);
+                        if (!receivedMessages.contains(message)) {
+                            deliver(message);
+                            receivedMessages.add(message);
+                        }
+                    }
+                } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-
-                if (packet.getX() == 1) {
-                    messagesAcked.add(packet.getY());
-                } else if (packet.getX() == 0) {
-                    Message message = packet.getY();
-                    nextMessagesToAck.add(message);
-                    if (!receivedMessages.contains(message)) {
-                        deliver(message);
-                        receivedMessages.add(message);
-                    }
-                }
             }
-        }
+            }
     }
+
 
     public class Sender implements Runnable {
         public void run() {
@@ -101,19 +119,23 @@ public class PerfectLink {
                 if (!messagesToSend.isEmpty()) {
                     synchronized (messagesToSend) {
                         messagesToSend.forEach((Message m) -> {
+                            Packet p = new Packet(m);
                             if (!(m == null)) {
-                                byte[] buf = encoder.encode(false, m);
-                                sendPacket(buf, m.getDestination());
+                                sendPacket(p, m.getDestination());
+                            } else {
+                                System.out.println("Null");
                             }
                         });
                     }
+
                 }
 
                 if (!messagesToAck.isEmpty()) {
                     synchronized (messagesToAck) {
                         messagesToAck.forEach((Message m) -> {
-                            byte[] buf = encoder.encode(true,m);
-                            sendPacket(buf, m.getSender());
+                            Ack a = new Ack(m);
+                            Packet p = new Packet(a);
+                            sendPacket(p, m.getSender());
                         });
                         messagesToAck.clear();
                     }
@@ -136,6 +158,7 @@ public class PerfectLink {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
             }
         }
     }
