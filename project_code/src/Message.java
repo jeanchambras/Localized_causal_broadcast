@@ -42,6 +42,8 @@ public class Message implements Serializable {
         this.sender = sender;
     }
 
+    public VectorClock getVectorClock(){return vectorClock; }
+
     @Override
     public boolean equals(Object o) {
         if (o == this) {

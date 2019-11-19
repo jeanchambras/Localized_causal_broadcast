@@ -11,15 +11,18 @@ import java.util.HashSet;
 
 public class FIFO implements Listener {
     private Urb urb;
+    private Listener lcb;
     private FileWriter f;
     private HashMap<ProcessDetails, Integer> nextMessageToDeliver;
     private HashSet<Tuple<String, ProcessDetails>> pending;
 
-    public FIFO(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, FileWriter f, NetworkTopology network) throws Exception {
+    public FIFO(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, FileWriter f, NetworkTopology network, Listener lcb) throws Exception {
         this.urb = new Urb(sender, socket, network, timeout, f, this);
         this.pending = new HashSet<>();
         this.nextMessageToDeliver = new HashMap<>();
         this.f = f;
+        this.lcb = lcb;
+
         for (ProcessDetails process : network.getProcessesInNetwork()) {
             nextMessageToDeliver.put(process, 1);
         }
@@ -56,9 +59,12 @@ public class FIFO implements Listener {
                 int next = nextMessageToDeliver.get(ts.getY());
                 next++;
                 nextMessageToDeliver.put(ts.getY(), next);
+
                 pending.remove(ts);
+                this.lcb.callback(ts);
             }
         } while (!(ts == null));
+
     }
 
     public void deliver(Tuple<String, ProcessDetails> t) {

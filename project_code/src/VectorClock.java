@@ -15,5 +15,14 @@ public class VectorClock implements Serializable {
     }
 
 
+    public int[] getArray(){
+        return vectorClock;
+    }
+
+
+
+
+
+
 
 }
