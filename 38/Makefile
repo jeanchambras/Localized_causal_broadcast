@@ -1,7 +1,7 @@
 all: Da_proc
 
 Da_proc: Da_proc.java
-	javac Da_proc.java
+	javac *.java
 
 clean:
-	rm Da_proc.class
+	rm *.class
