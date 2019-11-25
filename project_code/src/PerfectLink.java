@@ -34,10 +34,10 @@ public class PerfectLink {
         this.sender = new Sender();
         this.encoder = new Encoder(networkTopology);
         new Thread(server).start();
+        new Thread(sender).start();
     }
 
     public void sendMessages() {
-        new Thread(sender).start();
     }
 
     public void addMessagesToQueue(ArrayList<Message> messagesToAdd) {

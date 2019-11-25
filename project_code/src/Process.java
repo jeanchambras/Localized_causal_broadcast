@@ -23,7 +23,7 @@ public class Process {
     private FileWriter writer;
 
     public Process(int processReceivePort, int id, ArrayList<ProcessDetails> processesInNetwork, int numberOfMessages) throws Exception {
-        this.timeout = 10;
+        this.timeout = 20;
         this.network = new NetworkTopology(processesInNetwork);
         this.UDPinterface = new DatagramSocket(processReceivePort);
         this.sender = network.getProcessFromId(id);

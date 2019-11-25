@@ -14,6 +14,8 @@ public class FIFO implements Listener {
     private FileWriter f;
     private HashMap<ProcessDetails, Integer> nextMessageToDeliver;
     private HashSet<Tuple<String, ProcessDetails>> pending;
+    private ProcessDetails  source;
+    private int numberOfMessages;
 
     public FIFO(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, FileWriter f, NetworkTopology network) throws Exception {
         this.urb = new Urb(sender, socket, network, timeout, f, this);
@@ -23,7 +25,11 @@ public class FIFO implements Listener {
         for (ProcessDetails process : network.getProcessesInNetwork()) {
             nextMessageToDeliver.put(process, 1);
         }
-        ProcessDetails source = network.getProcessFromPort(socket.getLocalPort());
+        this.source = network.getProcessFromPort(socket.getLocalPort());
+        this.numberOfMessages = numberOfMessages;
+    }
+
+    public void sendMessages() {
         for (int i = 1; i <= numberOfMessages; ++i) {
             urb.addMessages(source, Integer.toString(i));
             try {
@@ -33,10 +39,6 @@ public class FIFO implements Listener {
                 e.printStackTrace();
             }
         }
-    }
-
-    public void sendMessages() {
-        urb.sendMessages();
     }
 
     @Override
