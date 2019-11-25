@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramSocket;
-import java.net.SocketException;
 import java.util.ArrayList;
 
 
@@ -16,7 +15,7 @@ import java.util.ArrayList;
 public class Process {
     private DatagramSocket UDPinterface;
     private NetworkTopology network;
-    private FIFO fifo;
+    private LCB lcb;
     private final int timeout;
     private File logfile;
     private ProcessDetails sender;
@@ -33,7 +32,7 @@ public class Process {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.fifo = new FIFO(sender, UDPinterface, numberOfMessages, timeout, writer, network);
+        this.lcb = new LCB(sender, UDPinterface, numberOfMessages, timeout, writer, network);
         Process.SigHandlerIntTerm sigHandlerInt = new Process.SigHandlerIntTerm(this);
         Signal signalInt = new Signal("INT");
         Signal.handle(signalInt, sigHandlerInt);
@@ -47,7 +46,7 @@ public class Process {
     }
 
     public void startClient() {
-        fifo.sendMessages();
+        lcb.sendMessages();
     }
 
     public static class SigHandlerIntTerm implements SignalHandler {

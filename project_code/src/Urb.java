@@ -18,6 +18,7 @@ public class Urb implements Listener {
     private Listener fifo;
 
 
+
     public Urb(ProcessDetails sender, DatagramSocket socket, NetworkTopology network, int timeout, FileWriter f, Listener fifo) {
         this.beb = new Beb(sender, socket, network, timeout, this);
         this.network = network;
@@ -26,6 +27,7 @@ public class Urb implements Listener {
         this.delivered = new HashSet<>();
         this.aliveProcesses = new HashSet<>();
         this.fifo = fifo;
+
         //We add to the set of alive processes all known processes initially
         aliveProcesses.addAll(network.getProcessesInNetwork());
     }

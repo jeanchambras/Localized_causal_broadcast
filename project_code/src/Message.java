@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.util.Vector;
 
 
 /**
@@ -11,12 +12,14 @@ public class Message implements Serializable {
     private ProcessDetails source;
     private String payload;
     private ProcessDetails sender;
+    private VectorClock vectorClock;
 
-    public Message(ProcessDetails destination, ProcessDetails source, String payload, ProcessDetails sender) {
+    public Message(ProcessDetails destination, ProcessDetails source, String payload, ProcessDetails sender, NetworkTopology networkTopology) {
         this.destination = destination;
         this.source = source;
         this.payload = payload;
         this.sender = sender;
+        this.vectorClock = new VectorClock(networkTopology);
     }
 
     public String getPayload() {
@@ -38,6 +41,8 @@ public class Message implements Serializable {
     public void setSender(ProcessDetails sender) {
         this.sender = sender;
     }
+
+    public VectorClock getVectorClock(){return vectorClock; }
 
     @Override
     public boolean equals(Object o) {

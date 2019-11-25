@@ -11,34 +11,26 @@ import java.util.HashSet;
 
 public class FIFO implements Listener {
     private Urb urb;
+    private Listener lcb;
     private FileWriter f;
     private HashMap<ProcessDetails, Integer> nextMessageToDeliver;
     private HashSet<Tuple<String, ProcessDetails>> pending;
     private ProcessDetails  source;
-    private int numberOfMessages;
-
-    public FIFO(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, FileWriter f, NetworkTopology network) throws Exception {
+    public FIFO(ProcessDetails sender, DatagramSocket socket, int timeout, FileWriter f, NetworkTopology network, Listener lcb) throws Exception {
         this.urb = new Urb(sender, socket, network, timeout, f, this);
         this.pending = new HashSet<>();
         this.nextMessageToDeliver = new HashMap<>();
         this.f = f;
+        this.lcb = lcb;
+
         for (ProcessDetails process : network.getProcessesInNetwork()) {
             nextMessageToDeliver.put(process, 1);
         }
         this.source = network.getProcessFromPort(socket.getLocalPort());
-        this.numberOfMessages = numberOfMessages;
     }
 
-    public void sendMessages() {
-        for (int i = 1; i <= numberOfMessages; ++i) {
-            urb.addMessages(source, Integer.toString(i));
-            try {
-                f.write("b " + i + "\n");
-                f.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+    public void sendMessages(String s) {
+        urb.addMessages(source, s);
     }
 
     @Override
@@ -47,7 +39,6 @@ public class FIFO implements Listener {
 
     @Override
     public void callback(Tuple<String, ProcessDetails> t) {
-        // System.out.println(pending.size());
         pending.add(t);
 
         Tuple<String, ProcessDetails> ts;
@@ -58,16 +49,16 @@ public class FIFO implements Listener {
                 int next = nextMessageToDeliver.get(ts.getY());
                 next++;
                 nextMessageToDeliver.put(ts.getY(), next);
+
                 pending.remove(ts);
             }
         } while (!(ts == null));
+
     }
 
-    public void deliver(Tuple<String, ProcessDetails> t) {
-        try {
-            f.write("d " + t.getY().getId() + " " + t.getX() + "\n");
-            f.flush();
-        } catch (IOException e) {}
+    public void deliver(Tuple<String, ProcessDetails> ts) {
+        this.lcb.callback(ts);
+
     }
 
 
