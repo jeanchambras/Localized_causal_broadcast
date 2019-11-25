@@ -16,7 +16,6 @@ import java.util.ArrayList;
 public class Process {
     private DatagramSocket UDPinterface;
     private NetworkTopology network;
-    private FIFO fifo;
     private LCB lcb;
     private final int timeout;
     private File logfile;
@@ -35,7 +34,6 @@ public class Process {
             e.printStackTrace();
         }
         this.lcb = new LCB(sender, UDPinterface, numberOfMessages, timeout, writer, network);
-        this.fifo = new FIFO(sender, UDPinterface, numberOfMessages, timeout, writer, network, lcb);
         Process.SigHandlerIntTerm sigHandlerInt = new Process.SigHandlerIntTerm(this);
         Signal signalInt = new Signal("INT");
         Signal.handle(signalInt, sigHandlerInt);
@@ -49,7 +47,7 @@ public class Process {
     }
 
     public void startClient() {
-        fifo.sendMessages();
+        lcb.sendMessages();
     }
 
     public static class SigHandlerIntTerm implements SignalHandler {

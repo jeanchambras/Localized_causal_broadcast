@@ -15,6 +15,7 @@ public class FIFO implements Listener {
     private FileWriter f;
     private HashMap<ProcessDetails, Integer> nextMessageToDeliver;
     private HashSet<Tuple<String, ProcessDetails>> pending;
+    private ProcessDetails source;
 
     public FIFO(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, FileWriter f, NetworkTopology network, Listener lcb) throws Exception {
         this.urb = new Urb(sender, socket, network, timeout, f, this);
@@ -27,19 +28,10 @@ public class FIFO implements Listener {
             nextMessageToDeliver.put(process, 1);
         }
         ProcessDetails source = network.getProcessFromPort(socket.getLocalPort());
-        for (int i = 1; i <= numberOfMessages; ++i) {
-            urb.addMessages(source, Integer.toString(i));
-            try {
-                f.write("b " + i + "\n");
-                f.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
-    public void sendMessages() {
-        urb.sendMessages();
+    public void sendMessages(String s) {
+        urb.addMessages(source, s);
     }
 
     @Override
@@ -61,15 +53,15 @@ public class FIFO implements Listener {
                 nextMessageToDeliver.put(ts.getY(), next);
 
                 pending.remove(ts);
-                this.lcb.callback(ts);
             }
         } while (!(ts == null));
 
     }
 
-    public void deliver(Tuple<String, ProcessDetails> t) {
+    public void deliver(Tuple<String, ProcessDetails> ts) {
+        this.lcb.callback(ts);
         try {
-            f.write("d " + t.getY().getId() + " " + t.getX() + "\n");
+            f.write("d " + ts.getY().getId() + " " + ts.getX() + "\n");
             f.flush();
         } catch (IOException e) {}
     }
