@@ -30,20 +30,20 @@ public class Encoder {
         return b;
     }
 
-    public Tuple<Integer, Message> decode (byte[] b) throws Exception {
-        int ack = ByteArrayToInt(new byte[] {b[0]});
-        return new Tuple<>(ack, getMessage(b));
-    }
+//    public Tuple<Integer, Message> decode (byte[] b) throws Exception {
+//        int ack = ByteArrayToInt(new byte[] {b[0]});
+//        return new Tuple<>(ack, getMessage(b));
+//    }
 
 
     //todo checker l'ordre
-    private Message getMessage(byte[] b) throws Exception {
-        ProcessDetails desti = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[2], b[1]}));
-        ProcessDetails source = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[4], b[3]}));
-        String payload = Integer.toString(ByteArrayToInt(new byte[] {b[6], b[5]}));
-        ProcessDetails sender = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[8], b[7]}));
-        return new Message(desti, source, payload, sender, nT);
-    }
+//    private Message getMessage(byte[] b) throws Exception {
+//        ProcessDetails desti = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[2], b[1]}));
+//        ProcessDetails source = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[4], b[3]}));
+//        String payload = Integer.toString(ByteArrayToInt(new byte[] {b[6], b[5]}));
+//        ProcessDetails sender = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[8], b[7]}));
+//        return new Message(desti, source, payload, sender, nT, new VectorClock());
+//    }
 
     private byte[] IntToByteArray( int data ) {
         byte[] result = new byte[2];

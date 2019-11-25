@@ -28,7 +28,7 @@ public class Triple<X, Y, Z> {
             return false;
         }
         Triple c = (Triple) o;
-        return this.x.equals(c.x) && this.y.equals(c.y) && this.z.equals(c.z);
+        return this.x.equals(c.getX()) && this.y.equals(c.getY()) && this.z.equals(c.getZ());
     }
 
 

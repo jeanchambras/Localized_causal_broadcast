@@ -22,10 +22,10 @@ public class Beb implements Listener {
         this.sender = sender;
     }
 
-    public void addMessage(ProcessDetails source, String payload) {
+    public void addMessage(ProcessDetails source, String payload, VectorClock vc) {
         ArrayList<Message> messages = new ArrayList<>();
         for (ProcessDetails destination : networkTopology.getProcessesInNetwork()) {
-            Message m = new Message(destination, source, payload, sender, networkTopology);
+            Message m = new Message(destination, source, payload, sender, networkTopology, vc);
             messages.add(m);
         }
         perfectLink.addMessagesToQueue(messages);
@@ -41,7 +41,7 @@ public class Beb implements Listener {
     }
 
     @Override
-    public void callback(Tuple t) {
+    public void callback(Triple t) {
     }
 
     public void deliver(Message m) {

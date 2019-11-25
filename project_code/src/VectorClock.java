@@ -1,5 +1,7 @@
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class VectorClock implements Serializable {
     private int[] vectorClock;
@@ -20,7 +22,22 @@ public class VectorClock implements Serializable {
     }
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof VectorClock)) {
+            return false;
+        }
+        VectorClock c = (VectorClock) o;
+        return Arrays.equals(this.vectorClock,c.getArray());
+    }
 
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(vectorClock);
+    }
 
 
 

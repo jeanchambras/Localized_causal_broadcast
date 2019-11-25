@@ -32,7 +32,7 @@ public class LCB implements Listener{
             int[] VCSEND = vcSend.getArray();
             int localId = sender.getId();
             VCSEND[localId-1]++;
-            fifo.sendMessages(Integer.toString(i));
+            fifo.sendMessages(Integer.toString(i),new VectorClock(network));
             try {
                 f.write("b " + i + "\n");
                 f.flush();
@@ -63,10 +63,10 @@ public class LCB implements Listener{
 
 
 
-    public void deliver(Tuple<String, ProcessDetails> ts)
+    public void deliver(Triple<String,VectorClock, ProcessDetails> ts)
     {
         try {
-            f.write("d " + ts.getY().getId() + " " + ts.getX() + "\n");
+            f.write("d " + ts.getZ().getId() + " " + ts.getX() + "\n");
             f.flush();
         } catch (IOException e) {}
     }
@@ -76,7 +76,7 @@ public class LCB implements Listener{
     }
 
     @Override
-    public void callback(Tuple t){
+    public void callback(Triple t){
         deliver(t);
 
     }

@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 
 
 /** FIFO implements the FIFO algorithm by using the URB algorithm lower in the stack. It also writes the expected output to a log file.
@@ -14,7 +15,7 @@ public class FIFO implements Listener {
     private Listener lcb;
     private FileWriter f;
     private HashMap<ProcessDetails, Integer> nextMessageToDeliver;
-    private HashSet<Tuple<String, ProcessDetails>> pending;
+    private HashSet<Triple<String,VectorClock, ProcessDetails>> pending;
     private ProcessDetails  source;
     public FIFO(ProcessDetails sender, DatagramSocket socket, int timeout, FileWriter f, NetworkTopology network, Listener lcb) throws Exception {
         this.urb = new Urb(sender, socket, network, timeout, f, this);
@@ -29,8 +30,8 @@ public class FIFO implements Listener {
         this.source = network.getProcessFromPort(socket.getLocalPort());
     }
 
-    public void sendMessages(String s) {
-        urb.addMessages(source, s);
+    public void sendMessages(String s,VectorClock vc) {
+        urb.addMessages(source, s,vc);
     }
 
     @Override
@@ -38,17 +39,18 @@ public class FIFO implements Listener {
     }
 
     @Override
-    public void callback(Tuple<String, ProcessDetails> t) {
+    public void callback(Triple<String,VectorClock, ProcessDetails> t) {
         pending.add(t);
 
-        Tuple<String, ProcessDetails> ts;
+        Triple<String,VectorClock, ProcessDetails> ts = null;
         do {
-            ts = pending.stream().filter(o -> nextMessageToDeliver.get(o.getY()) == Integer.parseInt(o.getX())).findAny().orElse(null);
+            ts = pending.stream().filter(Objects::nonNull).filter(o -> nextMessageToDeliver.get(o.getZ()).equals(Integer.parseInt(o.getX()))).findAny().orElse(null);
+
             if (!(ts == null)) {
                 deliver(ts);
-                int next = nextMessageToDeliver.get(ts.getY());
+                int next = nextMessageToDeliver.get(ts.getZ());
                 next++;
-                nextMessageToDeliver.put(ts.getY(), next);
+                nextMessageToDeliver.put(ts.getZ(), next);
 
                 pending.remove(ts);
             }
@@ -56,7 +58,7 @@ public class FIFO implements Listener {
 
     }
 
-    public void deliver(Tuple<String, ProcessDetails> ts) {
+    public void deliver(Triple<String,VectorClock, ProcessDetails> ts) {
         this.lcb.callback(ts);
 
     }

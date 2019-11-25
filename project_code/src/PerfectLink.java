@@ -38,7 +38,6 @@ public class PerfectLink {
         this.beb = beb;
         this.server = new Server();
         this.sender = new Sender();
-        this.encoder = new Encoder(networkTopology);
         new Thread(server).start();
         new Thread(sender).start();
     }

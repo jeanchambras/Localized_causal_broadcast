@@ -11,10 +11,10 @@ import java.util.*;
 public class Urb implements Listener {
     private Beb beb;
     private NetworkTopology network;
-    private HashSet<Tuple<String, ProcessDetails>> pendingMessages;
-    private HashSet<Tuple<String, ProcessDetails>> delivered;
+    private HashSet<Triple<String,VectorClock, ProcessDetails>> pendingMessages;
+    private HashSet<Triple<String,VectorClock, ProcessDetails>> delivered;
     private HashSet<ProcessDetails> aliveProcesses;
-    private HashMap<Tuple<String, ProcessDetails>, Set<ProcessDetails>> ackedMessages;
+    private HashMap<Triple<String,VectorClock, ProcessDetails>, Set<ProcessDetails>> ackedMessages;
     private Listener fifo;
 
 
@@ -37,17 +37,17 @@ public class Urb implements Listener {
         beb.sendMessages();
     }
 
-    public void addMessages(ProcessDetails source, String payload) {
-        pendingMessages.add(new Tuple<>(payload, source));
-        beb.addMessage(source, payload);
+    public void addMessages(ProcessDetails source, String payload, VectorClock vc) {
+        pendingMessages.add(new Triple<>(payload,vc, source));
+        beb.addMessage(source, payload, vc);
     }
 
-    public void deliver(Tuple<String, ProcessDetails> t) {
+    public void deliver(Triple<String,VectorClock, ProcessDetails> t) {
         fifo.callback(t);
     }
 
     public void checkToDeliver() {
-            Tuple<String, ProcessDetails> ts;
+            Triple<String,VectorClock, ProcessDetails> ts;
             do {
                 ts = pendingMessages.stream().filter(t-> canDeliver(t) && !delivered.contains(t)).findAny().orElse(null);
                 if (!(ts == null)) {
@@ -58,7 +58,7 @@ public class Urb implements Listener {
             } while (!(ts == null));
         }
 
-    public boolean canDeliver(Tuple<String, ProcessDetails> t) {
+    public boolean canDeliver(Triple<String,VectorClock, ProcessDetails> t) {
         int N = network.getProcessesInNetwork().size();
         if (ackedMessages.containsKey(t)) {
             int numberAcked = ackedMessages.get(t).size();
@@ -70,8 +70,7 @@ public class Urb implements Listener {
 
     @Override
     public void callback(Message m) {
-        Tuple<String, ProcessDetails> t = new Tuple<>(m.getPayload(), m.getSource());
-        beb.addMessage(t.getY(), t.getX());
+        Triple<String,VectorClock, ProcessDetails> t = new Triple<>(m.getPayload(),m.getVectorClock(), m.getSource());
         ProcessDetails sender = m.getSender();
 
         if (!ackedMessages.containsKey(t)) {
@@ -82,17 +81,18 @@ public class Urb implements Listener {
             ackedMessages.put(t, set);
         }
 
+
         //CHECK PENDING
         if (!pendingMessages.contains(t)) {
             m.setSender(sender);
             pendingMessages.add(t);
-            beb.addMessage(t.getY(), t.getX());
+            beb.addMessage(t.getZ(), t.getX(), m.getVectorClock());
         }
         checkToDeliver();
     }
 
     @Override
-    public void callback(Tuple t) {
+    public void callback(Triple t) {
     }
 
 }

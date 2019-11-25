@@ -14,12 +14,12 @@ public class Message implements Serializable {
     private ProcessDetails sender;
     private VectorClock vectorClock;
 
-    public Message(ProcessDetails destination, ProcessDetails source, String payload, ProcessDetails sender, NetworkTopology networkTopology) {
+    public Message(ProcessDetails destination, ProcessDetails source, String payload, ProcessDetails sender, NetworkTopology networkTopology, VectorClock vc) {
         this.destination = destination;
         this.source = source;
         this.payload = payload;
         this.sender = sender;
-        this.vectorClock = new VectorClock(networkTopology);
+        this.vectorClock =  vc;
     }
 
     public String getPayload() {
