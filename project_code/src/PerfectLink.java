@@ -122,8 +122,6 @@ public class PerfectLink {
                             Packet p = new Packet(m);
                             if (!(m == null)) {
                                 sendPacket(p, m.getDestination());
-                            } else {
-                                System.out.println("Null");
                             }
                         });
                     }

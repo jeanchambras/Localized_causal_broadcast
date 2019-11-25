@@ -29,10 +29,9 @@ public class LCB implements Listener{
 
     public void sendMessages(){
         for (int i = 1; i <= numberOfMessages; ++i) {
-//            int[] VCSEND = vcSend.getArray();
-//            int localId = sender.getId();
-            //TODO: think about the indexing
-//            VCSEND[localId-1]++;
+            int[] VCSEND = vcSend.getArray();
+            int localId = sender.getId();
+            VCSEND[localId-1]++;
             fifo.sendMessages(Integer.toString(i));
             try {
                 f.write("b " + i + "\n");
@@ -67,7 +66,7 @@ public class LCB implements Listener{
     public void deliver(Tuple<String, ProcessDetails> ts)
     {
         try {
-            f.write("d (LCB) " + ts.getY().getId() + " " + ts.getX() + "\n");
+            f.write("d " + ts.getY().getId() + " " + ts.getX() + "\n");
             f.flush();
         } catch (IOException e) {}
     }
