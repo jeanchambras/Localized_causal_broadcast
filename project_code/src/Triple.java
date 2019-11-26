@@ -1,16 +1,18 @@
+import java.util.Arrays;
+
 public class Triple<X, Y, Z> {
 
     private final X x;
-    private final Y y;
+    private final int[] y;
     private final Z z;
 
-    public Triple(X x, Y y, Z z) {
+    public Triple(X x, int[] y, Z z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public Y getY() {
+    public int[] getY() {
         return y;
     }
     public X getX() {
@@ -28,7 +30,7 @@ public class Triple<X, Y, Z> {
             return false;
         }
         Triple c = (Triple) o;
-        return this.x.equals(c.getX()) && this.y.equals(c.getY()) && this.z.equals(c.getZ());
+        return this.x.equals(c.getX()) && Arrays.equals(this.getY(),c.getY()) && this.z.equals(c.getZ());
     }
 
 
@@ -36,7 +38,7 @@ public class Triple<X, Y, Z> {
     //TODO: check heres
     @Override
     public int hashCode() {
-        return x.hashCode() * (y.hashCode() + 256)* z.hashCode();
+        return x.hashCode() * (Arrays.hashCode(y) + 256)* z.hashCode();
     }
 
 

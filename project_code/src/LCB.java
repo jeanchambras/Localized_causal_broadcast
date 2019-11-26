@@ -1,25 +1,28 @@
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramSocket;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
+import java.util.stream.IntStream;
 
-public class LCB implements Listener{
+public class LCB implements Listener {
     private NetworkTopology network;
     private DatagramSocket socket;
-    private FIFO fifo;
-    private VectorClock vcSend;
-    private VectorClock vcReceive;
-    private HashSet<Triple<ProcessDetails, VectorClock, Message>> pending;
+    private Urb Urb;
+    private int[] vcSend;
+    private int[] vcReceive;
+    private HashSet<Triple<String, int[], ProcessDetails>> pending;
     private int numberOfMessages;
     private FileWriter f;
     private ProcessDetails sender;
 
     public LCB(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, FileWriter f, NetworkTopology network) throws Exception {
-        this.fifo = new FIFO(sender, socket, timeout, f, network, this);
+        this.Urb = new Urb(sender,socket,network,timeout,f,this);
         this.network = network;
         this.socket = socket;
-        this.vcSend = new VectorClock(network);
-        this.vcReceive = new VectorClock(network);
+        this.vcSend = new int[network.getProcessesInNetwork().size()];
+        this.vcReceive = new int[network.getProcessesInNetwork().size()];
         this.pending = new HashSet<>();
         this.numberOfMessages = numberOfMessages;
         this.sender = sender;
@@ -27,12 +30,12 @@ public class LCB implements Listener{
     }
 
 
-    public void sendMessages(){
+    public void sendMessages() {
         for (int i = 1; i <= numberOfMessages; ++i) {
-            int[] VCSEND = vcSend.getArray();
+            int[] VCSEND = vcSend;
             int localId = sender.getId();
-            VCSEND[localId-1]++;
-            fifo.sendMessages(Integer.toString(i),new VectorClock(network));
+            Urb.addMessages(sender,Integer.toString(i), vcSend.clone());
+            VCSEND[localId - 1]++;
             try {
                 f.write("b " + i + "\n");
                 f.flush();
@@ -42,42 +45,34 @@ public class LCB implements Listener{
         }
     }
 
-
-
-
-
-    public void receiveMessage(Message m){
-        VectorClock vc = m.getVectorClock();
-        try {
-            int localId = network.getProcessFromPort(socket.getLocalPort()).getId();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        int[] VC = vc.getArray();
-        //TODO: here should we take the source or the sender?
-        ProcessDetails source = m.getSource();
-        VC[source.getId()-1]++;
-
-
-    }
-
-
-
-    public void deliver(Triple<String,VectorClock, ProcessDetails> ts)
-    {
+    public void deliver(Triple<String, int[], ProcessDetails> ts) {
         try {
             f.write("d " + ts.getZ().getId() + " " + ts.getX() + "\n");
             f.flush();
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
+    }
+    public boolean lessThan (int[] v1, int[]v2){
+        return IntStream.range(0,v1.length).allMatch(i -> v1[i] <= v2[i]);
     }
 
     @Override
-    public void callback(Message m){
+    public void callback(Message m) {
     }
 
     @Override
-    public void callback(Triple t){
-        deliver(t);
+    public void callback(Triple t) {
+        pending.add(t);
+        Triple<String,int[], ProcessDetails> ts;
+        do {
+            ts = pending.stream().filter(Objects::nonNull).filter(o ->lessThan(o.getY(),vcReceive)).findAny().orElse(null);
+            if (!(ts == null)) {
+                pending.remove(ts);
+                vcReceive[ts.getZ().getId()-1]++;
+                deliver(ts);
+            }
+        } while (!(ts == null));
+
 
     }
 

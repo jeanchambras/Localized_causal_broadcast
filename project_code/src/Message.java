@@ -12,9 +12,9 @@ public class Message implements Serializable {
     private ProcessDetails source;
     private String payload;
     private ProcessDetails sender;
-    private VectorClock vectorClock;
+    private int[] vectorClock;
 
-    public Message(ProcessDetails destination, ProcessDetails source, String payload, ProcessDetails sender, NetworkTopology networkTopology, VectorClock vc) {
+    public Message(ProcessDetails destination, ProcessDetails source, String payload, ProcessDetails sender, NetworkTopology networkTopology, int[] vc) {
         this.destination = destination;
         this.source = source;
         this.payload = payload;
@@ -42,7 +42,7 @@ public class Message implements Serializable {
         this.sender = sender;
     }
 
-    public VectorClock getVectorClock(){return vectorClock; }
+    public int[] getVectorClock(){return vectorClock; }
 
     @Override
     public boolean equals(Object o) {

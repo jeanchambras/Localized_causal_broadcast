@@ -2,6 +2,8 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 public class VectorClock implements Serializable {
     private int[] vectorClock;
@@ -17,8 +19,16 @@ public class VectorClock implements Serializable {
     }
 
 
+    public boolean lessThan (VectorClock v){
+        return IntStream.range(0,this.vectorClock.length).allMatch(i -> this.vectorClock[i] <= v.getArray()[i]);
+    }
+
     public int[] getArray(){
-        return vectorClock;
+        return vectorClock.clone();
+    }
+
+    public void updateVc(int[] newVc){
+        this.vectorClock = newVc;
     }
 
 

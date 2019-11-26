@@ -22,7 +22,7 @@ public class Beb implements Listener {
         this.sender = sender;
     }
 
-    public void addMessage(ProcessDetails source, String payload, VectorClock vc) {
+    public void addMessage(ProcessDetails source, String payload, int[] vc) {
         ArrayList<Message> messages = new ArrayList<>();
         for (ProcessDetails destination : networkTopology.getProcessesInNetwork()) {
             Message m = new Message(destination, source, payload, sender, networkTopology, vc);

@@ -150,6 +150,7 @@ public class PerfectLink {
                     messagesToSend.removeAll(messagesAcked);
                     messagesAcked.clear();
                 }
+                // TODO optimiser timeout
                 try {
                     Thread.sleep(timeout);
                 } catch (InterruptedException e) {

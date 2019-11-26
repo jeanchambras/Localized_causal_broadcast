@@ -30,7 +30,7 @@ public class FIFO implements Listener {
         this.source = network.getProcessFromPort(socket.getLocalPort());
     }
 
-    public void sendMessages(String s,VectorClock vc) {
+    public void sendMessages(String s,int[] vc) {
         urb.addMessages(source, s,vc);
     }
 
@@ -39,27 +39,27 @@ public class FIFO implements Listener {
     }
 
     @Override
-    public void callback(Triple<String,VectorClock, ProcessDetails> t) {
-        pending.add(t);
-
-        Triple<String,VectorClock, ProcessDetails> ts = null;
-        do {
-            ts = pending.stream().filter(Objects::nonNull).filter(o -> nextMessageToDeliver.get(o.getZ()).equals(Integer.parseInt(o.getX()))).findAny().orElse(null);
-
-            if (!(ts == null)) {
-                deliver(ts);
-                int next = nextMessageToDeliver.get(ts.getZ());
-                next++;
-                nextMessageToDeliver.put(ts.getZ(), next);
-
-                pending.remove(ts);
-            }
-        } while (!(ts == null));
+    public void callback(Triple<String,int[], ProcessDetails> t) {
+//        pending.add(t);
+//
+//        Triple<String,VectorClock, ProcessDetails> ts = null;
+//        do {
+//            ts = pending.stream().filter(Objects::nonNull).filter(o -> nextMessageToDeliver.get(o.getZ()).equals(Integer.parseInt(o.getX()))).findAny().orElse(null);
+//
+//            if (!(ts == null)) {
+//                deliver(ts);
+//                int next = nextMessageToDeliver.get(ts.getZ());
+//                next++;
+//                nextMessageToDeliver.put(ts.getZ(), next);
+//
+//                pending.remove(ts);
+//            }
+//        } while (!(ts == null));
 
     }
 
     public void deliver(Triple<String,VectorClock, ProcessDetails> ts) {
-        this.lcb.callback(ts);
+//        this.lcb.callback(ts);
 
     }
 
