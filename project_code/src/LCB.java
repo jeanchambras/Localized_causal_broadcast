@@ -16,8 +16,9 @@ public class LCB implements Listener {
     private int numberOfMessages;
     private FileWriter f;
     private ProcessDetails sender;
+    private HashSet<ProcessDetails> causality;
 
-    public LCB(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, FileWriter f, NetworkTopology network) throws Exception {
+    public LCB(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, FileWriter f, NetworkTopology network, HashSet<ProcessDetails> causality) throws Exception {
         this.Urb = new Urb(sender,socket,network,timeout,f,this);
         this.network = network;
         this.socket = socket;
@@ -26,6 +27,7 @@ public class LCB implements Listener {
         this.pending = new HashSet<>();
         this.numberOfMessages = numberOfMessages;
         this.sender = sender;
+        this.causality = causality;
         this.f = f;
     }
 
@@ -69,6 +71,9 @@ public class LCB implements Listener {
             if (!(ts == null)) {
                 pending.remove(ts);
                 vcReceive[ts.getZ().getId()-1]++;
+                if (causality.contains(ts.getZ())){
+                    vcSend[ts.getZ().getId() -1]++;
+                }
                 deliver(ts);
             }
         } while (!(ts == null));

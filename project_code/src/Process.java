@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 
 /** Process is the actual process of the application. It monitors the different signals and defines the network interface.
@@ -21,7 +22,7 @@ public class Process {
     private ProcessDetails sender;
     private FileWriter writer;
 
-    public Process(int processReceivePort, int id, ArrayList<ProcessDetails> processesInNetwork, int numberOfMessages) throws Exception {
+    public Process(int processReceivePort, int id, ArrayList<ProcessDetails> processesInNetwork, int numberOfMessages, HashSet<ProcessDetails> causality) throws Exception {
         this.timeout = 20;
         this.network = new NetworkTopology(processesInNetwork);
         this.UDPinterface = new DatagramSocket(processReceivePort);
@@ -32,7 +33,7 @@ public class Process {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.lcb = new LCB(sender, UDPinterface, numberOfMessages, timeout, writer, network);
+        this.lcb = new LCB(sender, UDPinterface, numberOfMessages, timeout, writer, network,causality);
         Process.SigHandlerIntTerm sigHandlerInt = new Process.SigHandlerIntTerm(this);
         Signal signalInt = new Signal("INT");
         Signal.handle(signalInt, sigHandlerInt);

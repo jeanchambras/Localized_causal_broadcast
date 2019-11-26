@@ -25,17 +25,37 @@ public class Da_proc {
                 numberProc = Integer.parseInt(thisLine);
             }
 
-            int i =0;
             ArrayList<ProcessDetails> processesInNetwork = new ArrayList<>();
-            while ((thisLine = br.readLine()) != null) {
+            for (int i =0; i < numberProc;++i){
+                thisLine = br.readLine();
                 String[] process_details = thisLine.split("\\s+");
                 processesInNetwork.add(new ProcessDetails(Integer.parseInt(process_details[0]),process_details[1],Integer.parseInt(process_details[2])));
             }
+
+
+            HashSet<ProcessDetails> causality = new HashSet<>();
+            for (int i =1; i <= numberProc;++i){
+                thisLine = br.readLine();
+                if(i == processToLaunch){
+                    String[] causality_informations = thisLine.split("\\s+");
+                    for(int j = 1; j < causality_informations.length; ++j){
+                        causality.add(processesInNetwork.get(Integer.parseInt(causality_informations[j])-1));
+                    }
+                    System.out.println(i + "|" + Arrays.toString(causality_informations) + " | " + causality.size());
+                }
+            }
+
             ProcessDetails processToLaunchDetails = processesInNetwork.get(processToLaunch - 1);
-            Process process = new Process(processToLaunchDetails.getPort(),processToLaunch, processesInNetwork,Integer.parseInt(args[2]));
+            Process process = new Process(processToLaunchDetails.getPort(),processToLaunch, processesInNetwork,Integer.parseInt(args[2]),causality);
+
+
+
         } catch(Exception e) {
+
             e.printStackTrace();
         }
+
+
     }
 }
 
