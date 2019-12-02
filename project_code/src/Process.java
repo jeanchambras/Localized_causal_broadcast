@@ -17,13 +17,12 @@ public class Process {
     private DatagramSocket UDPinterface;
     private NetworkTopology network;
     private LCB lcb;
-    private final int timeout;
     private File logfile;
     private ProcessDetails sender;
     private FileWriter writer;
+    public static final int TIMEOUT_TIME = 20;
 
     public Process(int processReceivePort, int id, ArrayList<ProcessDetails> processesInNetwork, int numberOfMessages, HashSet<ProcessDetails> causality) throws Exception {
-        this.timeout = 20;
         this.network = new NetworkTopology(processesInNetwork);
         this.UDPinterface = new DatagramSocket(processReceivePort);
         this.sender = network.getProcessFromId(id);
@@ -33,11 +32,12 @@ public class Process {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.lcb = new LCB(sender, UDPinterface, numberOfMessages, timeout, writer, network,causality);
+        this.lcb = new LCB(sender, UDPinterface, numberOfMessages, TIMEOUT_TIME, writer, network,causality);
+
+        // initialize signals handlers
         Process.SigHandlerIntTerm sigHandlerInt = new Process.SigHandlerIntTerm(this);
         Signal signalInt = new Signal("INT");
         Signal.handle(signalInt, sigHandlerInt);
-
         Signal signalTerm = new Signal("TERM");
         Signal.handle(signalTerm, sigHandlerInt);
 
@@ -50,6 +50,7 @@ public class Process {
         lcb.sendMessages();
     }
 
+//    Handle INT / TERM signals that makes the process stop (Fail Stop model)
     public static class SigHandlerIntTerm implements SignalHandler {
         Process p;
 
@@ -68,7 +69,7 @@ public class Process {
             System.exit(-1);
         }
     }
-
+// Handle USR2 signals, start to send messages
     public static class SigHandlerUsr2 implements SignalHandler {
         Process p;
 
