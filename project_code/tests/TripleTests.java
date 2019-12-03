@@ -4,9 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class TripleTests {
-    public TripleTests(){
-    }
-
     @Test
     public void testEquality() {
         ProcessDetails proc1 = new ProcessDetails(1,"127.0.0.1", 1001);
