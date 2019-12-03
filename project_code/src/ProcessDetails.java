@@ -1,6 +1,4 @@
 import java.io.Serializable;
-import java.net.UnknownHostException;
-
 
 /**
  * The ProcessDetails class defines a process object through its ip address, its ip port and its id.
