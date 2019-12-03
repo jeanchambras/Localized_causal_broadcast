@@ -1,10 +1,10 @@
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Vector;
 
 
 /**
  * The message class defines a message that is sent between different processes. It contains the field destination, source (original sender) and sender (the address of the process which forwarded the message).
- *
  */
 
 public class Message implements Serializable {
@@ -14,12 +14,12 @@ public class Message implements Serializable {
     private ProcessDetails sender;
     private int[] vectorClock;
 
-    public Message(ProcessDetails destination, ProcessDetails source, String payload, ProcessDetails sender, NetworkTopology networkTopology, int[] vc) {
+    public Message(ProcessDetails destination, ProcessDetails source, String payload, ProcessDetails sender, int[] vc) {
         this.destination = destination;
         this.source = source;
         this.payload = payload;
         this.sender = sender;
-        this.vectorClock =  vc;
+        this.vectorClock = vc;
     }
 
     public String getPayload() {
@@ -42,7 +42,9 @@ public class Message implements Serializable {
         this.sender = sender;
     }
 
-    public int[] getVectorClock(){return vectorClock; }
+    public int[] getVectorClock() {
+        return vectorClock;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -53,12 +55,16 @@ public class Message implements Serializable {
             return false;
         }
         Message c = (Message) o;
-        return this.destination.equals(c.destination) && this.source.equals(c.source) && this.payload.equals(c.payload) && this.sender.equals(c.sender);
+        return this.destination.equals(c.destination) && this.source.equals(c.source) && this.payload.equals(c.payload) && this.sender.equals(c.sender) && Arrays.equals(this.vectorClock, c.vectorClock);
     }
 
     @Override
     public int hashCode() {
-        return destination.hashCode() * source.hashCode() * payload.hashCode();
+        int hash = destination.hashCode();
+        hash = 31 * hash + source.hashCode();
+        hash = 31 * hash + payload.hashCode();
+        hash = 31 * hash + sender.hashCode();
+        return 31 * hash + Arrays.hashCode(vectorClock);
     }
 
 }
