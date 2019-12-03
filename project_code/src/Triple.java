@@ -15,10 +15,14 @@ public class Triple<X, Y, Z> {
     public int[] getY() {
         return y;
     }
+
     public X getX() {
         return x;
     }
-    public Z getZ() { return z; }
+
+    public Z getZ() {
+        return z;
+    }
 
 
     @Override
@@ -30,15 +34,13 @@ public class Triple<X, Y, Z> {
             return false;
         }
         Triple c = (Triple) o;
-        return this.x.equals(c.getX()) && Arrays.equals(this.getY(),c.getY()) && this.z.equals(c.getZ());
+        return this.x.equals(c.getX()) && Arrays.equals(this.getY(), c.getY()) && this.z.equals(c.getZ());
     }
 
 
-
-    //TODO: check heres
     @Override
     public int hashCode() {
-        return x.hashCode() * (Arrays.hashCode(y) + 256)* z.hashCode();
+        return 31 * (31 * x.hashCode() + (Arrays.hashCode(y))) + z.hashCode();
     }
 
 
