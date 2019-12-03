@@ -16,15 +16,6 @@ public class NetworkTopology {
         return processesInNetwork;
     }
 
-    public ProcessDetails getProcessFromPort(int port) throws Exception {
-        for (ProcessDetails p : processesInNetwork) {
-            if (p.getPort() == port) {
-                return p;
-            }
-        }
-        throw new Exception("Not valid port number");
-    }
-
     public ProcessDetails getProcessFromId(int id) throws Exception {
         for (ProcessDetails p : processesInNetwork) {
             if (p.getId() == id) {
