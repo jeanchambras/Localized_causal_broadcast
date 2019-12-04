@@ -16,7 +16,7 @@ public class Beb implements Listener {
     private NetworkTopology networkTopology;
     private ProcessDetails sender;
     public Beb(ProcessDetails sender, DatagramSocket socket, NetworkTopology network, int timeout, Listener urb) {
-        this.perfectLink = new PerfectLink(network, socket, timeout, this);
+        this.perfectLink = new PerfectLink(socket, timeout, this);
         this.networkTopology = network;
         this.urb = urb;
         this.sender = sender;
@@ -25,7 +25,7 @@ public class Beb implements Listener {
     public void addMessage(ProcessDetails source, String payload, int[] vc) {
         ArrayList<Message> messages = new ArrayList<>();
         for (ProcessDetails destination : networkTopology.getProcessesInNetwork()) {
-            Message m = new Message(destination, source, payload, sender, networkTopology, vc);
+            Message m = new Message(destination, source, payload, sender, vc);
             messages.add(m);
         }
         perfectLink.addMessagesToQueue(messages);

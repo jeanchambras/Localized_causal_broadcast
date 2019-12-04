@@ -6,7 +6,6 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 /**
  * The PerfectLink class defines the perfect link algorithm as well as handling the network reading and writing. 
@@ -26,7 +25,7 @@ public class PerfectLink {
     private Listener beb;
     private Encoder encoder;
 
-    public PerfectLink(NetworkTopology networkTopology, DatagramSocket socket, int timeout, Listener beb) {
+    public PerfectLink(DatagramSocket socket, int timeout, Listener beb) {
         this.receivedMessages = new ArrayList<>();
         this.messagesToAck = new ArrayList<>();
         this.nextMessagesToAck = new ArrayList<>();

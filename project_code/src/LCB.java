@@ -7,8 +7,6 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 
 public class LCB implements Listener {
-    private NetworkTopology network;
-    private DatagramSocket socket;
     private Urb Urb;
     private int[] vcSend;
     private int[] vcReceive;
@@ -18,10 +16,8 @@ public class LCB implements Listener {
     private ProcessDetails sender;
     private HashSet<ProcessDetails> causality;
 
-    public LCB(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, FileWriter f, NetworkTopology network, HashSet<ProcessDetails> causality) throws Exception {
+    public LCB(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, FileWriter f, NetworkTopology network, HashSet<ProcessDetails> causality){
         this.Urb = new Urb(sender,socket,network,timeout,f,this);
-        this.network = network;
-        this.socket = socket;
         this.vcSend = new int[network.getProcessesInNetwork().size()];
         this.vcReceive = new int[network.getProcessesInNetwork().size()];
         this.pending = new HashSet<>();
@@ -34,10 +30,9 @@ public class LCB implements Listener {
 
     public void sendMessages() {
         for (int i = 1; i <= numberOfMessages; ++i) {
-            int[] VCSEND = vcSend;
             int localId = sender.getId();
             Urb.addMessages(sender,Integer.toString(i), vcSend.clone());
-            VCSEND[localId - 1]++;
+            vcSend[localId - 1]++;
             try {
                 f.write("b " + i + "\n");
                 f.flush();
