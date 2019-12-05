@@ -7,9 +7,14 @@ import java.util.ArrayList;
 
 public class NetworkTopology {
     private ArrayList<ProcessDetails> processesInNetwork;
-
+    private int numberOfpeers;
     public NetworkTopology(ArrayList<ProcessDetails> processesInNetwork) {
         this.processesInNetwork = processesInNetwork;
+        this.numberOfpeers = processesInNetwork.size();
+    }
+
+    public int getNumberOfpeers() {
+        return numberOfpeers;
     }
 
     public ArrayList<ProcessDetails> getProcessesInNetwork() {
