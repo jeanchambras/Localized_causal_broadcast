@@ -16,7 +16,7 @@ public class Beb implements Listener {
     private NetworkTopology networkTopology;
     private ProcessDetails sender;
     public Beb(ProcessDetails sender, DatagramSocket socket, NetworkTopology network, int timeout, Listener urb) {
-        this.perfectLink = new PerfectLink(socket, timeout, this);
+        this.perfectLink = new PerfectLink(network,socket, timeout, this);
         this.networkTopology = network;
         this.urb = urb;
         this.sender = sender;
