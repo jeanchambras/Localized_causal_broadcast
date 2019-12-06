@@ -1,4 +1,3 @@
-import java.io.FileWriter;
 import java.net.DatagramSocket;
 import java.util.*;
 
@@ -19,7 +18,7 @@ public class Urb implements Listener {
 
 
 
-    public Urb(ProcessDetails sender, DatagramSocket socket, NetworkTopology network, int timeout, FileWriter f, Listener lcb) {
+    public Urb(ProcessDetails sender, DatagramSocket socket, NetworkTopology network, int timeout, Listener lcb) {
         this.beb = new Beb(sender, socket, network, timeout, this);
         this.network = network;
         this.ackedMessages = new HashMap<>();
@@ -27,14 +26,8 @@ public class Urb implements Listener {
         this.delivered = new HashSet<>();
         this.aliveProcesses = new HashSet<>();
         this.lcb = lcb;
-
         //We add to the set of alive processes all known processes initially
         aliveProcesses.addAll(network.getProcessesInNetwork());
-    }
-
-
-    public void sendMessages() {
-        beb.sendMessages();
     }
 
     public void addMessages(ProcessDetails source, String payload, int[] vc) {

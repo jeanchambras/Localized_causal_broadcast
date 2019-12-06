@@ -1,6 +1,7 @@
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -19,8 +20,9 @@ public class Process {
     private LCB lcb;
     private File logfile;
     private ProcessDetails sender;
-    private FileWriter writer;
+    private BufferedWriter writer;
     public static final int TIMEOUT_TIME = 20;
+    public static final int BUFFER_WRITER_SIZE = 1024*8;
 
     public Process(int processReceivePort, int id, ArrayList<ProcessDetails> processesInNetwork, int numberOfMessages, HashSet<ProcessDetails> causality) throws Exception {
         this.network = new NetworkTopology(processesInNetwork);
@@ -28,7 +30,7 @@ public class Process {
         this.sender = network.getProcessFromId(id);
         this.logfile = new File("./da_proc_" + id + ".out");
         try {
-            this.writer = new FileWriter(logfile, false);
+            this.writer = new BufferedWriter(new FileWriter(logfile, false),BUFFER_WRITER_SIZE);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -61,6 +63,11 @@ public class Process {
 
         @Override
         public void handle(Signal signal) {
+            try {
+                p.writer.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             try {
                 p.writer.close();
             } catch (IOException e) {

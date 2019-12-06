@@ -1,7 +1,6 @@
-import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.DatagramSocket;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -12,12 +11,12 @@ public class LCB implements Listener {
     private int[] vcReceive;
     private HashSet<Triple<String, int[], ProcessDetails>> pending;
     private int numberOfMessages;
-    private FileWriter f;
+    private BufferedWriter f;
     private ProcessDetails sender;
     private HashSet<ProcessDetails> causality;
 
-    public LCB(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, FileWriter f, NetworkTopology network, HashSet<ProcessDetails> causality){
-        this.Urb = new Urb(sender,socket,network,timeout,f,this);
+    public LCB(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, BufferedWriter f, NetworkTopology network, HashSet<ProcessDetails> causality){
+        this.Urb = new Urb(sender,socket,network,timeout,this);
         this.vcSend = new int[network.getProcessesInNetwork().size()];
         this.vcReceive = new int[network.getProcessesInNetwork().size()];
         this.pending = new HashSet<>();
@@ -35,7 +34,6 @@ public class LCB implements Listener {
             vcSend[localId - 1]++;
             try {
                 f.write("b " + i + "\n");
-                f.flush();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -45,7 +43,6 @@ public class LCB implements Listener {
     public void deliver(Triple<String, int[], ProcessDetails> ts) {
         try {
             f.write("d " + ts.getZ().getId() + " " + ts.getX() + "\n");
-            f.flush();
         } catch (IOException e) {
         }
     }
