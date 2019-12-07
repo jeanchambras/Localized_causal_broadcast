@@ -1,18 +1,17 @@
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * The PerfectLink class defines the perfect link algorithm as well as handling the network reading and writing.
  */
 
 public class PerfectLink {
-    private ArrayList<Message> messagesToSend;
-    private ArrayList<Message> nextMessagesToSend;
-    private ArrayList<Message> messagesToAck;
-    private ArrayList<Message> nextMessagesToAck;
-    private ArrayList<Message> receivedMessages;
-    private ArrayList<Message> messagesAcked;
+    private HashSet<Message> messagesToSend;
+    private HashSet<Message> messagesToAck;
+    private HashSet<Message> receivedMessages;
+    private HashSet<Message> messagesAcked;
     private DatagramSocket socket;
     private Server server;
     private Sender sender;
@@ -22,12 +21,10 @@ public class PerfectLink {
     private int SIZE;
 
     public PerfectLink(NetworkTopology net, DatagramSocket socket, int timeout, Listener beb) {
-        this.receivedMessages = new ArrayList<>();
-        this.messagesToAck = new ArrayList<>();
-        this.nextMessagesToAck = new ArrayList<>();
-        this.messagesAcked = new ArrayList<>();
-        this.messagesToSend = new ArrayList<>();
-        this.nextMessagesToSend = new ArrayList<>();
+        this.receivedMessages = new HashSet<>();
+        this.messagesToAck = new HashSet<>();
+        this.messagesAcked = new HashSet<>();
+        this.messagesToSend = new HashSet<>();
         this.socket = socket;
         this.timeout = timeout;
         this.beb = beb;
@@ -43,7 +40,9 @@ public class PerfectLink {
     }
 
     public void addMessagesToQueue(ArrayList<Message> messagesToAdd) {
-        this.nextMessagesToSend.addAll(messagesToAdd);
+        synchronized (messagesToSend) {
+            this.messagesToSend.addAll(messagesToAdd);
+        }
     }
 
 
@@ -82,10 +81,16 @@ public class PerfectLink {
                 }
 
                 if (packet.getX() == 1) {
-                    messagesAcked.add(packet.getY());
+                    synchronized (messagesAcked) {
+
+                        messagesAcked.add(packet.getY());
+                    }
                 } else if (packet.getX() == 0) {
                     Message message = packet.getY();
-                    nextMessagesToAck.add(message);
+                    synchronized (messagesToAck) {
+                        messagesToAck.add(message);
+
+                    }
                     if (!receivedMessages.contains(message)) {
                         deliver(message);
                         receivedMessages.add(message);
@@ -112,23 +117,19 @@ public class PerfectLink {
                     synchronized (messagesToAck) {
                         messagesToAck.forEach((Message m) -> {
                             byte[] buf = encoder.encode(true, m);
+
                             sendPacket(buf, m.getSender());
                         });
                         messagesToAck.clear();
                     }
                 }
 
-                if (!nextMessagesToAck.isEmpty()) {
-                    messagesToAck.addAll(nextMessagesToAck);
-                    nextMessagesToAck.clear();
-                }
-                if (!nextMessagesToSend.isEmpty()) {
-                    messagesToSend.addAll(nextMessagesToSend);
-                    nextMessagesToSend.clear();
-                }
                 if (!messagesAcked.isEmpty()) {
-                    messagesToSend.removeAll(messagesAcked);
-                    messagesAcked.clear();
+                    synchronized (messagesAcked) {
+                        messagesToSend.removeAll(messagesAcked);
+                        messagesAcked.clear();
+
+                    }
                 }
                 // TODO optimiser timeout
                 try {
