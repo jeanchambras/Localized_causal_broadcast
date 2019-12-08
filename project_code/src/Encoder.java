@@ -55,13 +55,12 @@ public class Encoder {
     }
 
 
-    //todo checker l'ordre
     public Message getMessage(byte[] b){
         ProcessDetails source = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[2], b[1]}));
         ProcessDetails destination = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[4], b[3]}));
         ProcessDetails sender = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[6], b[5]}));
         String payload = Integer.toString(ByteArrayToInt(new byte[] {b[9],b[8], b[7]}));
-        int[] vector_clock = byteArray2intArray(Arrays.copyOfRange(b,10,b.length));
+        int[] vector_clock = byteArray2intArray(Arrays.copyOfRange(b,10,SIZE));
         return new Message(destination, source, payload, sender, vector_clock);
     }
 
