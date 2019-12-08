@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.IntStream;
 
 public class LCB implements Listener {
@@ -14,6 +15,8 @@ public class LCB implements Listener {
     private BufferedWriter f;
     private ProcessDetails sender;
     private HashSet<ProcessDetails> causality;
+    private ConcurrentLinkedQueue<Integer> sending;
+    private int window;
 
     public LCB(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, BufferedWriter f, NetworkTopology network, HashSet<ProcessDetails> causality){
         this.Urb = new Urb(sender,socket,network,timeout,this);
@@ -23,12 +26,17 @@ public class LCB implements Listener {
         this.numberOfMessages = numberOfMessages;
         this.sender = sender;
         this.causality = causality;
+        this.sending = new ConcurrentLinkedQueue<>();
         this.f = f;
+        this.window = Math.max(1, timeout/network.getNumberOfpeers());
     }
 
 
     public void sendMessages() {
         for (int i = 1; i <= numberOfMessages; ++i) {
+            while(!(sending.size() < window)){
+
+            }
             int localId = sender.getId();
             Urb.addMessages(sender,Integer.toString(i), vcSend.clone());
             vcSend[localId - 1]++;
@@ -37,6 +45,7 @@ public class LCB implements Listener {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            sending.add(i);
         }
     }
 
@@ -44,6 +53,9 @@ public class LCB implements Listener {
         try {
             f.write("d " + ts.getZ().getId() + " " + ts.getX() + "\n");
         } catch (IOException e) {
+        }
+        if(ts.getZ().equals(sender)){
+            sending.poll();
         }
     }
     public boolean lessThan (int[] v1, int[]v2){
