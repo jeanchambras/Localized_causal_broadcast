@@ -51,6 +51,10 @@ public class PerfectLink {
         }
     }
 
+    public void addToDeliver(Message m) {
+        toDeliver.add(m);
+    }
+
 
     public void sendPacket(byte[] buf, ProcessDetails destination) {
         try {
@@ -88,17 +92,15 @@ public class PerfectLink {
 
                 if (packet.getX() == 1) {
                     synchronized (messagesAcked) {
-
                         messagesAcked.add(packet.getY());
                     }
                 } else if (packet.getX() == 0) {
                     Message message = packet.getY();
                     synchronized (messagesToAck) {
                         messagesToAck.add(message);
-
                     }
                     if (!receivedMessages.contains(message)) {
-                        toDeliver.add(message);
+                        addToDeliver(message);
                         receivedMessages.add(message);
                     }
                 }
@@ -111,6 +113,7 @@ public class PerfectLink {
             while (true) {
                 if (!messagesToSend.isEmpty()) {
                     synchronized (messagesToSend) {
+
                         messagesToSend.forEach((Message m) -> {
                             byte[] buf = encoder.encode(false, m);
                             sendPacket(buf, m.getDestination());

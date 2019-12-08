@@ -27,7 +27,7 @@ public class Beb implements Listener {
         for (ProcessDetails destination : networkTopology.getProcessesInNetwork()) {
             Message m = new Message(destination, source, payload, sender, vc);
             if (m.getDestination().equals(sender)){
-                callback(m);
+                perfectLink.addToDeliver(m);
             } else {
                 messages.add(m);
             }
