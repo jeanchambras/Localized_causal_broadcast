@@ -41,6 +41,8 @@ public class Urb implements Listener {
 
     public void checkToDeliver() {
             Triple<String,int[], ProcessDetails> ts;
+            try {
+
             do {
                 ts = pendingMessages.stream().filter(t-> canDeliver(t) && !delivered.contains(t)).findAny().orElse(null);
                 if (!(ts == null)) {
@@ -49,6 +51,9 @@ public class Urb implements Listener {
                     deliver(ts);
                 }
             } while (!(ts == null));
+            }catch(Exception e){
+
+            }
         }
 
     public boolean canDeliver(Triple<String,int[], ProcessDetails> t) {

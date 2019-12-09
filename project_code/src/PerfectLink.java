@@ -138,7 +138,7 @@ public class PerfectLink {
                         try {
                             messagesToSend.removeAll(messagesAcked);
                         } catch (Exception e) {
-                            e.printStackTrace();
+//                            e.printStackTrace();
                         }
                         messagesAcked.clear();
 
