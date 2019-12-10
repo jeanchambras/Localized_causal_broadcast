@@ -3,6 +3,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The PerfectLink class defines the perfect link algorithm as well as handling the network reading and writing.
@@ -22,6 +23,8 @@ public class PerfectLink {
     private Listener beb;
     private Encoder encoder;
     private int SIZE;
+    private ReentrantLock lockA = new ReentrantLock();
+    private ReentrantLock lockB = new ReentrantLock();
 
     public PerfectLink(NetworkTopology net, DatagramSocket socket, int timeout, Listener beb) {
         this.receivedMessages = new HashSet<>();
@@ -46,8 +49,11 @@ public class PerfectLink {
     }
 
     public void addMessagesToQueue(ArrayList<Message> messagesToAdd) {
-        synchronized (messagesToSend) {
+        lockA.lock();
+        try {
             this.messagesToSend.addAll(messagesToAdd);
+        } finally {
+            lockA.unlock();
         }
     }
 
@@ -91,13 +97,19 @@ public class PerfectLink {
                 }
 
                 if (packet.getX() == 1) {
-                    synchronized (messagesAcked) {
+                    try {
+                        lockB.lock();
                         messagesAcked.add(packet.getY());
+                    } finally {
+                        lockB.unlock();
                     }
                 } else if (packet.getX() == 0) {
                     Message message = packet.getY();
-                    synchronized (messagesToAck) {
+                    try {
+                        lockB.lock();
                         messagesToAck.add(message);
+                    } finally {
+                        lockB.unlock();
                     }
                     if (!receivedMessages.contains(message)) {
                         addToDeliver(message);
@@ -112,37 +124,44 @@ public class PerfectLink {
         public void run() {
             while (true) {
                 if (!messagesToSend.isEmpty()) {
-                    synchronized (messagesToSend) {
-
+                    try {
+                        lockA.lock();
                         messagesToSend.forEach((Message m) -> {
                             byte[] buf = encoder.encode(false, m);
                             sendPacket(buf, m.getDestination());
                         });
+                    } finally {
+                        lockA.unlock();
                     }
-
                 }
 
                 if (!messagesToAck.isEmpty()) {
-                    synchronized (messagesToAck) {
+                    try {
+                        lockB.lock();
                         messagesToAck.forEach((Message m) -> {
                             byte[] buf = encoder.encode(true, m);
-
                             sendPacket(buf, m.getSender());
                         });
                         messagesToAck.clear();
+                    } finally {
+                        lockB.unlock();
                     }
                 }
-
-                if (!messagesAcked.isEmpty()) {
-                    synchronized (messagesAcked) {
+                try {
+                    lockB.lock();
+                    if (!messagesAcked.isEmpty()) {
                         try {
+                            lockA.lock();
                             messagesToSend.removeAll(messagesAcked);
                         } catch (Exception e) {
-//                            e.printStackTrace();
+                            e.printStackTrace();
+                        } finally {
+                            lockA.unlock();
                         }
                         messagesAcked.clear();
-
                     }
+                } finally {
+                    lockB.unlock();
                 }
                 System.gc();
                 try {

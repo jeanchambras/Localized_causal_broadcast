@@ -1,5 +1,6 @@
 import java.net.DatagramSocket;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * URB class defines the URB algorithm. Like every algorithm in the stack it has the sendMessages and deliver functions which corresponds to the Broadcast and Deliver functions of the algorithms.
@@ -15,6 +16,7 @@ public class Urb implements Listener {
     private HashSet<ProcessDetails> aliveProcesses;
     private HashMap<Triple<Integer, int[], ProcessDetails>, Set<ProcessDetails>> ackedMessages;
     private Listener lcb;
+    private ReentrantLock lock = new ReentrantLock();
 
 
     public Urb(ProcessDetails sender, DatagramSocket socket, NetworkTopology network, int timeout, Listener lcb) {
@@ -30,7 +32,12 @@ public class Urb implements Listener {
     }
 
     public void addMessages(ProcessDetails source, Integer payload, int[] vc) {
-        pendingMessages.add(new Triple<>(payload, vc, source));
+        lock.lock();
+        try {
+            pendingMessages.add(new Triple<>(payload, vc, source));
+        } finally {
+            lock.unlock();
+        }
         beb.addMessage(source, payload, vc);
     }
 
@@ -43,16 +50,21 @@ public class Urb implements Listener {
         try {
 
             do {
-                ts = pendingMessages.stream().filter(t -> canDeliver(t) && !delivered.contains(t)).findAny().orElse(null);
-                if (!(ts == null)) {
-                    delivered.add(ts);
-                    pendingMessages.remove(ts);
-                    ackedMessages.remove(ts);
-                    deliver(ts);
+                lock.lock();
+                try {
+                    ts = pendingMessages.stream().filter(t -> canDeliver(t) && !delivered.contains(t)).findAny().orElse(null);
+                    if (!(ts == null)) {
+                        delivered.add(ts);
+                        pendingMessages.remove(ts);
+                        ackedMessages.remove(ts);
+                        deliver(ts);
+                    }
+                } finally {
+                    lock.unlock();
                 }
             } while (!(ts == null));
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
 
@@ -79,11 +91,14 @@ public class Urb implements Listener {
             ackedMessages.put(t, set);
         }
 
-
-        //CHECK PENDING
         if (!pendingMessages.contains(t)) {
             m.setSender(sender);
-            pendingMessages.add(t);
+            lock.lock();
+            try {
+                pendingMessages.add(t);
+            } finally {
+                lock.unlock();
+            }
             beb.addMessage(t.getZ(), t.getX(), m.getVectorClock());
         }
         checkToDeliver();
