@@ -10,12 +10,11 @@ import java.util.*;
 public class Urb implements Listener {
     private Beb beb;
     private NetworkTopology network;
-    private HashSet<Triple<String,int[], ProcessDetails>> pendingMessages;
-    private HashSet<Triple<String,int[], ProcessDetails>> delivered;
+    private HashSet<Triple<String, int[], ProcessDetails>> pendingMessages;
+    private HashSet<Triple<String, int[], ProcessDetails>> delivered;
     private HashSet<ProcessDetails> aliveProcesses;
-    private HashMap<Triple<String,int[], ProcessDetails>, Set<ProcessDetails>> ackedMessages;
+    private HashMap<Triple<String, int[], ProcessDetails>, Set<ProcessDetails>> ackedMessages;
     private Listener lcb;
-
 
 
     public Urb(ProcessDetails sender, DatagramSocket socket, NetworkTopology network, int timeout, Listener lcb) {
@@ -31,44 +30,45 @@ public class Urb implements Listener {
     }
 
     public void addMessages(ProcessDetails source, String payload, int[] vc) {
-        pendingMessages.add(new Triple<>(payload,vc, source));
+        pendingMessages.add(new Triple<>(payload, vc, source));
         beb.addMessage(source, payload, vc);
     }
 
-    public void deliver(Triple<String,int[], ProcessDetails> t) {
+    public void deliver(Triple<String, int[], ProcessDetails> t) {
         lcb.callback(t);
     }
 
     public void checkToDeliver() {
-            Triple<String,int[], ProcessDetails> ts;
-            try {
+        Triple<String, int[], ProcessDetails> ts;
+        try {
 
             do {
-                ts = pendingMessages.stream().filter(t-> canDeliver(t) && !delivered.contains(t)).findAny().orElse(null);
+                ts = pendingMessages.stream().filter(t -> canDeliver(t) && !delivered.contains(t)).findAny().orElse(null);
                 if (!(ts == null)) {
                     delivered.add(ts);
                     pendingMessages.remove(ts);
+                    ackedMessages.remove(ts);
                     deliver(ts);
                 }
             } while (!(ts == null));
-            }catch(Exception e){
+        } catch (Exception e) {
 
-            }
         }
+    }
 
-    public boolean canDeliver(Triple<String,int[], ProcessDetails> t) {
+    public boolean canDeliver(Triple<String, int[], ProcessDetails> t) {
         int N = network.getProcessesInNetwork().size();
-        if (ackedMessages.containsKey(t)) {
-            int numberAcked = ackedMessages.get(t).size();
-            return 2 * numberAcked >= N;
+        Set numberAcked = ackedMessages.get(t);
+        if (!(numberAcked == null)) {
+            int size = numberAcked.size();
+            return 2 * size >= N;
         }
-
         return false;
     }
 
     @Override
     public void callback(Message m) {
-        Triple<String,int[], ProcessDetails> t = new Triple<>(m.getPayload(),m.getVectorClock(), m.getSource());
+        Triple<String, int[], ProcessDetails> t = new Triple<>(m.getPayload(), m.getVectorClock(), m.getSource());
         ProcessDetails sender = m.getSender();
 
         if (!ackedMessages.containsKey(t)) {
