@@ -144,7 +144,7 @@ public class PerfectLink {
 
                     }
                 }
-//                 TODO optimiser timeout
+                System.gc();
                 try {
                     Thread.sleep(timeout);
                 } catch (InterruptedException e) {
