@@ -56,7 +56,7 @@ public class EncoderTests {
         NetworkTopology net = new NetworkTopology(processes);
         Encoder encoder = new Encoder(net);
         int idSender = 1, idDestination = 2, idSource = 0;
-        String payload = "1";
+        Integer payload = 1;
         int[] vc = new int[]{0, 1, 2};
         Message m = new Message(net.getProcessFromId(idDestination), net.getProcessFromId(idSource),
                 payload, net.getProcessFromId(idSender), vc);
@@ -84,7 +84,7 @@ public class EncoderTests {
         NetworkTopology net = new NetworkTopology(processes);
         Encoder encoder = new Encoder(net);
         int idSender = proc1.getId(), idDestination = proc2.getId(), idSource = proc3.getId();
-        String payload = "789000";
+        Integer payload = 789000;
         int[] vc = new int[]{7000000, 1, 2};
         Message m = new Message(net.getProcessFromId(idDestination), net.getProcessFromId(idSource),
                 payload, net.getProcessFromId(idSender), vc);
@@ -112,7 +112,7 @@ public class EncoderTests {
 
         NetworkTopology net = new NetworkTopology(processes);
         Encoder encoder = new Encoder(net);
-        String payload = "789000";
+        Integer payload = 789000;
         int[] vc = new int[]{7000000, 1, 2};
         Message m = new Message(proc1, proc2,
                 payload, proc1, vc);
@@ -141,13 +141,13 @@ public class EncoderTests {
         Encoder encoder = new Encoder(net);
 
         Message m1 = new Message(proc3, proc3,
-                "765", proc3, new int[]{7, 547, 12});
+                765, proc3, new int[]{7, 547, 12});
 
         Message m2 = new Message(proc3, proc1,
-                "800", proc2, new int[]{7000000, 19877, 1232});
+                800, proc2, new int[]{7000000, 19877, 1232});
 
         Message m3 = new Message(proc3, proc1,
-                "800", proc2, new int[]{7000000, 19877, 1232});
+                800, proc2, new int[]{7000000, 19877, 1232});
 
 
         Tuple<Integer, Message> t1= new Tuple<>(0,m2);

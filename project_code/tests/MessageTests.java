@@ -16,13 +16,13 @@ public class MessageTests {
         ProcessDetails proc3 = new ProcessDetails(3, "127.0.0.1", 3003);
         ProcessDetails proc33 = new ProcessDetails(3, "127.0.0.1", 3003);
 
-        Message message1 = new Message(proc2, proc1, "12345", proc3, new int[]{1, 2, 3});
-        Message message11 = new Message(proc2, proc1, "12345", proc3, new int[]{1, 2, 3});
-        Message message111 = new Message(proc22, proc1, "12345", proc33, new int[]{1, 2, 3});
-        Message message2 = new Message(proc22, proc1, "12347", proc33, new int[]{1, 2, 3});
-        Message message3 = new Message(proc1, proc2, "12345", proc3, new int[]{1, 2, 3});
-        Message message33 = new Message(proc11, proc2, "12345", proc3, new int[]{1, 2, 3});
-        Message message4 = new Message(proc11, proc2, "12345", proc3, new int[]{1, 1, 1});
+        Message message1 = new Message(proc2, proc1, 12345, proc3, new int[]{1, 2, 3});
+        Message message11 = new Message(proc2, proc1, 12345, proc3, new int[]{1, 2, 3});
+        Message message111 = new Message(proc22, proc1, 12345, proc33, new int[]{1, 2, 3});
+        Message message2 = new Message(proc22, proc1, 12347, proc33, new int[]{1, 2, 3});
+        Message message3 = new Message(proc1, proc2, 12345, proc3, new int[]{1, 2, 3});
+        Message message33 = new Message(proc11, proc2, 12345, proc3, new int[]{1, 2, 3});
+        Message message4 = new Message(proc11, proc2, 12345, proc3, new int[]{1, 1, 1});
 
         assertEquals(message1, message11);
         assertNotEquals(message1, message2);
@@ -42,14 +42,14 @@ public class MessageTests {
         ProcessDetails proc3 = new ProcessDetails(3, "127.0.0.1", 3003);
         ProcessDetails proc33 = new ProcessDetails(3, "127.0.0.1", 3003);
 
-        Message message1 = new Message(proc2, proc1, "12345", proc3, new int[]{1, 2, 3});
-        Message message11 = new Message(proc2, proc1, "12345", proc3, new int[]{1, 2, 3});
-        Message message111 = new Message(proc22, proc1, "12345", proc33, new int[]{1, 2, 3});
-        Message message2 = new Message(proc22, proc1, "12347", proc33, new int[]{1, 2, 3});
-        Message message3 = new Message(proc1, proc2, "12345", proc3, new int[]{1, 2, 3});
-        Message message33 = new Message(proc11, proc2, "12345", proc3, new int[]{1, 2, 3});
-        Message message4 = new Message(proc11, proc2, "12345", proc3, new int[]{1, 1, 1});
-        Message message5 = new Message(proc2, proc3, "12345", proc1, new int[]{1, 2, 3});
+        Message message1 = new Message(proc2, proc1, 12345, proc3, new int[]{1, 2, 3});
+        Message message11 = new Message(proc2, proc1, 12345, proc3, new int[]{1, 2, 3});
+        Message message111 = new Message(proc22, proc1, 12345, proc33, new int[]{1, 2, 3});
+        Message message2 = new Message(proc22, proc1, 12347, proc33, new int[]{1, 2, 3});
+        Message message3 = new Message(proc1, proc2, 12345, proc3, new int[]{1, 2, 3});
+        Message message33 = new Message(proc11, proc2, 12345, proc3, new int[]{1, 2, 3});
+        Message message4 = new Message(proc11, proc2, 12345, proc3, new int[]{1, 1, 1});
+        Message message5 = new Message(proc2, proc3, 12345, proc1, new int[]{1, 2, 3});
 
         assertEquals(message1.hashCode(), message11.hashCode());
         assertNotEquals(message1.hashCode(), message2.hashCode());

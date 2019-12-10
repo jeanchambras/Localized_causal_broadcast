@@ -10,11 +10,11 @@ import java.util.Vector;
 public class Message implements Serializable {
     private ProcessDetails destination;
     private ProcessDetails source;
-    private String payload;
+    private Integer payload;
     private ProcessDetails sender;
     private int[] vectorClock;
 
-    public Message(ProcessDetails destination, ProcessDetails source, String payload, ProcessDetails sender, int[] vc) {
+    public Message(ProcessDetails destination, ProcessDetails source, Integer payload, ProcessDetails sender, int[] vc) {
         this.destination = destination;
         this.source = source;
         this.payload = payload;
@@ -22,7 +22,7 @@ public class Message implements Serializable {
         this.vectorClock = vc;
     }
 
-    public String getPayload() {
+    public Integer getPayload() {
         return payload;
     }
 

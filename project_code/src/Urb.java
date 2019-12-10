@@ -10,10 +10,10 @@ import java.util.*;
 public class Urb implements Listener {
     private Beb beb;
     private NetworkTopology network;
-    private HashSet<Triple<String, int[], ProcessDetails>> pendingMessages;
-    private HashSet<Triple<String, int[], ProcessDetails>> delivered;
+    private HashSet<Triple<Integer, int[], ProcessDetails>> pendingMessages;
+    private HashSet<Triple<Integer, int[], ProcessDetails>> delivered;
     private HashSet<ProcessDetails> aliveProcesses;
-    private HashMap<Triple<String, int[], ProcessDetails>, Set<ProcessDetails>> ackedMessages;
+    private HashMap<Triple<Integer, int[], ProcessDetails>, Set<ProcessDetails>> ackedMessages;
     private Listener lcb;
 
 
@@ -29,17 +29,17 @@ public class Urb implements Listener {
         aliveProcesses.addAll(network.getProcessesInNetwork());
     }
 
-    public void addMessages(ProcessDetails source, String payload, int[] vc) {
+    public void addMessages(ProcessDetails source, Integer payload, int[] vc) {
         pendingMessages.add(new Triple<>(payload, vc, source));
         beb.addMessage(source, payload, vc);
     }
 
-    public void deliver(Triple<String, int[], ProcessDetails> t) {
+    public void deliver(Triple<Integer, int[], ProcessDetails> t) {
         lcb.callback(t);
     }
 
     public void checkToDeliver() {
-        Triple<String, int[], ProcessDetails> ts;
+        Triple<Integer, int[], ProcessDetails> ts;
         try {
 
             do {
@@ -56,7 +56,7 @@ public class Urb implements Listener {
         }
     }
 
-    public boolean canDeliver(Triple<String, int[], ProcessDetails> t) {
+    public boolean canDeliver(Triple<Integer, int[], ProcessDetails> t) {
         int N = network.getProcessesInNetwork().size();
         Set numberAcked = ackedMessages.get(t);
         if (!(numberAcked == null)) {
@@ -68,7 +68,7 @@ public class Urb implements Listener {
 
     @Override
     public void callback(Message m) {
-        Triple<String, int[], ProcessDetails> t = new Triple<>(m.getPayload(), m.getVectorClock(), m.getSource());
+        Triple<Integer, int[], ProcessDetails> t = new Triple<>(m.getPayload(), m.getVectorClock(), m.getSource());
         ProcessDetails sender = m.getSender();
 
         if (!ackedMessages.containsKey(t)) {

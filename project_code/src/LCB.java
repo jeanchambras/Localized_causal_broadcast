@@ -10,7 +10,7 @@ public class LCB implements Listener {
     private Urb Urb;
     private int[] vcSend;
     private int[] vcReceive;
-    private HashSet<Triple<String, int[], ProcessDetails>> pending;
+    private HashSet<Triple<Integer, int[], ProcessDetails>> pending;
     private int numberOfMessages;
     private BufferedWriter f;
     private ProcessDetails sender;
@@ -38,7 +38,7 @@ public class LCB implements Listener {
 
             }
             int localId = sender.getId();
-            Urb.addMessages(sender,Integer.toString(i), vcSend.clone());
+            Urb.addMessages(sender,i, vcSend.clone());
             vcSend[localId - 1]++;
             try {
                 f.write("b " + i + "\n");
@@ -49,7 +49,7 @@ public class LCB implements Listener {
         }
     }
 
-    public void deliver(Triple<String, int[], ProcessDetails> ts) {
+    public void deliver(Triple<Integer, int[], ProcessDetails> ts) {
         try {
             f.write("d " + ts.getZ().getId() + " " + ts.getX() + "\n");
         } catch (IOException e) {
@@ -69,7 +69,7 @@ public class LCB implements Listener {
     @Override
     public void callback(Triple t) {
         pending.add(t);
-        Triple<String,int[], ProcessDetails> ts;
+        Triple<Integer,int[], ProcessDetails> ts;
         do {
             ts = pending.stream().filter(Objects::nonNull).filter(o ->lessThan(o.getY(),vcReceive)).findAny().orElse(null);
             if (!(ts == null)) {

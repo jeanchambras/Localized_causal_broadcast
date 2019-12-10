@@ -41,9 +41,9 @@ public class Encoder {
         b[4] = IntToByteArray(m.getDestination().getId())[1];
         b[5] = IntToByteArray(m.getSender().getId())[0];
         b[6] = IntToByteArray(m.getSender().getId())[1];
-        b[7] = IntToByteArray(Integer.parseInt(m.getPayload()))[0];
-        b[8] = IntToByteArray(Integer.parseInt(m.getPayload()))[1];
-        b[9] = IntToByteArray(Integer.parseInt(m.getPayload()))[2];
+        b[7] = IntToByteArray(m.getPayload())[0];
+        b[8] = IntToByteArray(m.getPayload())[1];
+        b[9] = IntToByteArray(m.getPayload())[2];
         byte[] vc_b = intArray2byteArray(m.getVectorClock());
         arraycopy(vc_b,0,b,10,vc_b.length);
         return b;
@@ -59,7 +59,7 @@ public class Encoder {
         ProcessDetails source = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[2], b[1]}));
         ProcessDetails destination = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[4], b[3]}));
         ProcessDetails sender = nT.getProcessFromId(ByteArrayToInt(new byte[] {b[6], b[5]}));
-        String payload = Integer.toString(ByteArrayToInt(new byte[] {b[9],b[8], b[7]}));
+        Integer payload = ByteArrayToInt(new byte[] {b[9],b[8], b[7]});
         int[] vector_clock = byteArray2intArray(Arrays.copyOfRange(b,10,SIZE));
         return new Message(destination, source, payload, sender, vector_clock);
     }
