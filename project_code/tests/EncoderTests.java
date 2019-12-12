@@ -13,10 +13,7 @@ public class EncoderTests {
         ProcessDetails proc2 = new ProcessDetails(2, "127.0.0.1", 2002);
         ProcessDetails proc3 = new ProcessDetails(3, "127.0.0.1", 3003);
 
-        ArrayList processes = new ArrayList();
-        processes.add(proc1);
-        processes.add(proc2);
-        processes.add(proc3);
+        ProcessDetails[] processes = new ProcessDetails[]{proc1,proc2,proc3};
 
         NetworkTopology net = new NetworkTopology(processes);
         Encoder encoder = new Encoder(net);
@@ -48,10 +45,7 @@ public class EncoderTests {
         ProcessDetails proc2 = new ProcessDetails(1, "127.0.0.1", 2002);
         ProcessDetails proc3 = new ProcessDetails(2, "127.0.0.1", 3003);
 
-        ArrayList processes = new ArrayList();
-        processes.add(proc1);
-        processes.add(proc2);
-        processes.add(proc3);
+        ProcessDetails[] processes = new ProcessDetails[]{proc1,proc2,proc3};
 
         NetworkTopology net = new NetworkTopology(processes);
         Encoder encoder = new Encoder(net);
@@ -76,10 +70,7 @@ public class EncoderTests {
         ProcessDetails proc2 = new ProcessDetails(19, "127.0.0.1", 2002);
         ProcessDetails proc3 = new ProcessDetails(20, "127.0.0.1", 3003);
 
-        ArrayList processes = new ArrayList();
-        processes.add(proc1);
-        processes.add(proc2);
-        processes.add(proc3);
+        ProcessDetails[] processes = new ProcessDetails[]{proc1,proc2,proc3};
 
         NetworkTopology net = new NetworkTopology(processes);
         Encoder encoder = new Encoder(net);
@@ -105,10 +96,7 @@ public class EncoderTests {
         ProcessDetails proc2 = new ProcessDetails(65535, "127.0.0.1", 2002);
         ProcessDetails proc3 = new ProcessDetails(20, "127.0.0.1", 3003);
 
-        ArrayList processes = new ArrayList();
-        processes.add(proc1);
-        processes.add(proc2);
-        processes.add(proc3);
+        ProcessDetails[] processes = new ProcessDetails[]{proc1,proc2,proc3};
 
         NetworkTopology net = new NetworkTopology(processes);
         Encoder encoder = new Encoder(net);
@@ -132,10 +120,7 @@ public class EncoderTests {
         ProcessDetails proc2 = new ProcessDetails(65535, "127.0.0.1", 2002);
         ProcessDetails proc3 = new ProcessDetails(20, "127.0.0.1", 3003);
 
-        ArrayList processes = new ArrayList();
-        processes.add(proc1);
-        processes.add(proc2);
-        processes.add(proc3);
+        ProcessDetails[] processes = new ProcessDetails[]{proc1,proc2,proc3};
 
         NetworkTopology net = new NetworkTopology(processes);
         Encoder encoder = new Encoder(net);

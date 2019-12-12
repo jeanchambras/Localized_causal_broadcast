@@ -20,32 +20,31 @@ public class LCB implements Listener {
 
     public LCB(ProcessDetails sender, DatagramSocket socket, int numberOfMessages, int timeout, BufferedWriter f, NetworkTopology network, HashSet<ProcessDetails> causality){
         this.Urb = new Urb(sender,socket,network,timeout,this);
-        this.vcSend = new int[network.getProcessesInNetwork().size()];
-        this.vcReceive = new int[network.getProcessesInNetwork().size()];
+        this.vcSend = new int[network.getProcessesInNetwork().length];
+        this.vcReceive = new int[network.getProcessesInNetwork().length];
         this.pending = new HashSet<>();
         this.numberOfMessages = numberOfMessages;
         this.sender = sender;
         this.causality = causality;
         this.sending = new ConcurrentLinkedQueue<>();
         this.f = f;
-        this.window = Math.max(1, 100/network.getNumberOfpeers());
+        this.window = 10;
     }
 
 
     public void sendMessages() {
         for (int i = 1; i <= numberOfMessages; ++i) {
-            while(!(sending.size() < window)){
-
-            }
             int localId = sender.getId();
             Urb.addMessages(sender,i, vcSend.clone());
             vcSend[localId - 1]++;
             try {
                 f.write("b " + i + "\n");
             } catch (IOException e) {
-                e.printStackTrace();
             }
             sending.add(i);
+            while(!(sending.size() < window)){
+
+            }
         }
     }
 

@@ -13,7 +13,6 @@ public class Urb implements Listener {
     private NetworkTopology network;
     private HashSet<Triple<Integer, int[], ProcessDetails>> pendingMessages;
     private HashSet<Triple<Integer, int[], ProcessDetails>> delivered;
-    private HashSet<ProcessDetails> aliveProcesses;
     private HashMap<Triple<Integer, int[], ProcessDetails>, Set<ProcessDetails>> ackedMessages;
     private Listener lcb;
     private ReentrantLock lock = new ReentrantLock();
@@ -25,10 +24,7 @@ public class Urb implements Listener {
         this.ackedMessages = new HashMap<>();
         this.pendingMessages = new HashSet<>();
         this.delivered = new HashSet<>();
-        this.aliveProcesses = new HashSet<>();
         this.lcb = lcb;
-        //We add to the set of alive processes all known processes initially
-        aliveProcesses.addAll(network.getProcessesInNetwork());
     }
 
     public void addMessages(ProcessDetails source, Integer payload, int[] vc) {
@@ -52,7 +48,8 @@ public class Urb implements Listener {
             do {
                 lock.lock();
                 try {
-                    ts = pendingMessages.stream().filter(t -> canDeliver(t) && !delivered.contains(t)).findAny().orElse(null);
+                    ts = pendingMessages.stream().filter(t -> canDeliver(t)
+                            && !delivered.contains(t)).findAny().orElse(null);
                     if (!(ts == null)) {
                         delivered.add(ts);
                         pendingMessages.remove(ts);
@@ -69,7 +66,7 @@ public class Urb implements Listener {
     }
 
     public boolean canDeliver(Triple<Integer, int[], ProcessDetails> t) {
-        int N = network.getProcessesInNetwork().size();
+        int N = network.getProcessesInNetwork().length;
         Set numberAcked = ackedMessages.get(t);
         if (!(numberAcked == null)) {
             int size = numberAcked.size();

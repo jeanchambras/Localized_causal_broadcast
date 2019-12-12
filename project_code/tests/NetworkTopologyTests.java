@@ -13,10 +13,7 @@ public class NetworkTopologyTests {
         ProcessDetails proc2 = new ProcessDetails(2, "127.0.0.1", 2002);
         ProcessDetails proc3 = new ProcessDetails(3, "127.0.0.1", 3003);
 
-        ArrayList processes = new ArrayList();
-        processes.add(proc1);
-        processes.add(proc2);
-        processes.add(proc3);
+        ProcessDetails[] processes = new ProcessDetails[]{proc1,proc2,proc3};
 
         NetworkTopology net = new NetworkTopology(processes);
         assertEquals(processes, net.getProcessesInNetwork());
@@ -29,10 +26,7 @@ public class NetworkTopologyTests {
         ProcessDetails proc2 = new ProcessDetails(2, "127.0.0.1", 2002);
         ProcessDetails proc3 = new ProcessDetails(3, "127.0.0.1", 3003);
 
-        ArrayList processes = new ArrayList();
-        processes.add(proc1);
-        processes.add(proc2);
-        processes.add(proc3);
+        ProcessDetails[] processes = new ProcessDetails[]{proc1,proc2,proc3};
 
         NetworkTopology net = new NetworkTopology(processes);
         assertEquals(proc1, net.getProcessFromId(1));
@@ -48,9 +42,7 @@ public class NetworkTopologyTests {
         ProcessDetails proc1 = new ProcessDetails(1, "127.0.0.1", 1001);
         ProcessDetails proc2 = new ProcessDetails(2, "127.0.0.1", 2002);
 
-        ArrayList processes = new ArrayList();
-        processes.add(proc1);
-        processes.add(proc2);
+        ProcessDetails[] processes = new ProcessDetails[]{proc1,proc2};
 
         NetworkTopology net = new NetworkTopology(processes);
         net.getProcessFromId(5);

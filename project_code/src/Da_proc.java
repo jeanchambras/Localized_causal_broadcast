@@ -18,8 +18,6 @@ public class Da_proc {
         int processToLaunch = Integer.parseInt(args[0]);
         String membershipFilePath = args[1];
         int numberOfMessages = Integer.parseInt(args[2]);
-
-
         // start to parse membership file
         String line;
         try {
@@ -31,7 +29,7 @@ public class Da_proc {
                 numberOfProcesses = Integer.parseInt(line);
             }
 
-            ArrayList<ProcessDetails> processesInNetwork = new ArrayList<>();
+            ProcessDetails[] processesInNetwork = new ProcessDetails[numberOfProcesses];
             for (int i = 0; i < numberOfProcesses; ++i) {
                 line = br.readLine();
                 String[] process_details = line.split("\\s+");
@@ -40,7 +38,7 @@ public class Da_proc {
                 String address = process_details[1];
                 int port = Integer.parseInt(process_details[2]);
 
-                processesInNetwork.add(new ProcessDetails(id, address, port));
+                processesInNetwork[i] = new ProcessDetails(id, address, port);
             }
 
             HashSet<ProcessDetails> causality = new HashSet<>();
@@ -51,12 +49,12 @@ public class Da_proc {
                     // The first element in the causality informations list is the id of the process
                     // (not to include in the causality list as each process has a causal relationship with itself)
                     for (int j = 1; j < causality_informations.length; ++j) {
-                        causality.add(processesInNetwork.get(Integer.parseInt(causality_informations[j]) - 1));
+                        causality.add(processesInNetwork[Integer.parseInt(causality_informations[j]) - 1]);
                     }
                 }
             }
-
-            ProcessDetails processToLaunchDetails = processesInNetwork.get(processToLaunch - 1);
+            br.close();
+            ProcessDetails processToLaunchDetails = processesInNetwork[processToLaunch - 1];
             new Process(processToLaunchDetails.getPort(), processToLaunch, processesInNetwork, numberOfMessages, causality);
 
         } catch (FileNotFoundException e) {

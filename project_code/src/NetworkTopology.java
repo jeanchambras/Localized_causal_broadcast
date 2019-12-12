@@ -6,18 +6,18 @@ import java.util.ArrayList;
 
 
 public class NetworkTopology {
-    private ArrayList<ProcessDetails> processesInNetwork;
+    private ProcessDetails[] processesInNetwork;
     private int numberOfpeers;
-    public NetworkTopology(ArrayList<ProcessDetails> processesInNetwork) {
+    public NetworkTopology(ProcessDetails[] processesInNetwork) {
         this.processesInNetwork = processesInNetwork;
-        this.numberOfpeers = processesInNetwork.size();
+        this.numberOfpeers = processesInNetwork.length;
     }
 
     public int getNumberOfpeers() {
         return numberOfpeers;
     }
 
-    public ArrayList<ProcessDetails> getProcessesInNetwork() {
+    public ProcessDetails[] getProcessesInNetwork() {
         return processesInNetwork;
     }
 

@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 
-/** Process is the actual process of the application. It monitors the different signals and defines the network interface.
- *
+/**
+ * Process is the actual process of the application. It monitors the different signals and defines the network interface.
  */
 
 public class Process {
@@ -21,20 +21,20 @@ public class Process {
     private File logfile;
     private ProcessDetails sender;
     private BufferedWriter writer;
-    public static final int TIMEOUT_TIME = 20;
-    public static final int BUFFER_WRITER_SIZE = 1024*8;
+    public final int TIMEOUT_TIME = 45;
+    public final int BUFFER_WRITER_SIZE = 1024 * 8;
 
-    public Process(int processReceivePort, int id, ArrayList<ProcessDetails> processesInNetwork, int numberOfMessages, HashSet<ProcessDetails> causality) throws Exception {
+    public Process(int processReceivePort, int id, ProcessDetails[] processesInNetwork, int numberOfMessages, HashSet<ProcessDetails> causality) throws Exception {
         this.network = new NetworkTopology(processesInNetwork);
         this.UDPinterface = new DatagramSocket(processReceivePort);
         this.sender = network.getProcessFromId(id);
         this.logfile = new File("./da_proc_" + id + ".out");
         try {
-            this.writer = new BufferedWriter(new FileWriter(logfile, false),BUFFER_WRITER_SIZE);
+            this.writer = new BufferedWriter(new FileWriter(logfile, false), BUFFER_WRITER_SIZE);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.lcb = new LCB(sender, UDPinterface, numberOfMessages, TIMEOUT_TIME, writer, network,causality);
+        this.lcb = new LCB(sender, UDPinterface, numberOfMessages, TIMEOUT_TIME, writer, network, causality);
 
         // initialize signals handlers
         Process.SigHandlerIntTerm sigHandlerInt = new Process.SigHandlerIntTerm(this);
@@ -52,7 +52,7 @@ public class Process {
         lcb.sendMessages();
     }
 
-//    Handle INT / TERM signals that makes the process stop (Fail Stop model)
+    //    Handle INT / TERM signals that makes the process stop (Fail Stop model)
     public static class SigHandlerIntTerm implements SignalHandler {
         Process p;
 
@@ -76,7 +76,8 @@ public class Process {
             System.exit(-1);
         }
     }
-// Handle USR2 signals, start to send messages
+
+    // Handle USR2 signals, start to send messages
     public static class SigHandlerUsr2 implements SignalHandler {
         Process p;
 
