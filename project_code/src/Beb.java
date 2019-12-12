@@ -35,10 +35,6 @@ public class Beb implements Listener {
         perfectLink.addMessagesToQueue(messages);
     }
 
-    public void sendMessages() {
-        perfectLink.sendMessages();
-    }
-
     @Override
     public void callback(Message m) {
         deliver(m);
