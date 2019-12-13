@@ -28,7 +28,7 @@ public class LCB implements Listener {
         this.causality = causality;
         this.sending = new ConcurrentLinkedQueue<>();
         this.f = f;
-        this.window = 10;
+        this.window = Math.max(1,1545/(int)Math.pow(network.getNumberOfpeers(),2.7));
     }
 
 
