@@ -11,7 +11,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Urb implements Listener {
     private Beb beb;
     private NetworkTopology network;
-    private HashSet<Triple<Integer, int[], ProcessDetails>> pendingMessages;
     private HashSet<Triple<Integer, int[], ProcessDetails>> delivered;
     private HashMap<Triple<Integer, int[], ProcessDetails>, Set<ProcessDetails>> ackedMessages;
     private Listener lcb;
@@ -22,7 +21,6 @@ public class Urb implements Listener {
         this.beb = new Beb(sender, socket, network, timeout, this);
         this.network = network;
         this.ackedMessages = new HashMap<>();
-        this.pendingMessages = new HashSet<>();
         this.delivered = new HashSet<>();
         this.lcb = lcb;
     }
@@ -30,7 +28,7 @@ public class Urb implements Listener {
     public void addMessages(ProcessDetails source, Integer payload, int[] vc) {
         lock.lock();
         try {
-            pendingMessages.add(new Triple<>(payload, vc, source));
+            ackedMessages.put(new Triple<>(payload, vc, source), new HashSet<>(Collections.singletonList(source)));
         } finally {
             lock.unlock();
         }
@@ -44,17 +42,18 @@ public class Urb implements Listener {
     public void checkToDeliver() {
         Triple<Integer, int[], ProcessDetails> ts;
         try {
-
             do {
                 lock.lock();
                 try {
-                    ts = pendingMessages.stream().filter(t -> canDeliver(t)
-                            && !delivered.contains(t)).findAny().orElse(null);
-                    if (!(ts == null)) {
-                        delivered.add(ts);
-                        pendingMessages.remove(ts);
-                        ackedMessages.remove(ts);
-                        deliver(ts);
+                    ts = null;
+                    for (Map.Entry<Triple<Integer, int[], ProcessDetails>, Set<ProcessDetails>> entry : ackedMessages.entrySet()) {
+                        if (canDeliver(entry.getKey()) && !delivered.contains(entry.getKey())) {
+                            ts = entry.getKey();
+                            delivered.add(ts);
+                            ackedMessages.remove(ts);
+                            deliver(ts);
+                            break;
+                        }
                     }
                 } finally {
                     lock.unlock();
@@ -82,21 +81,11 @@ public class Urb implements Listener {
 
         if (!ackedMessages.containsKey(t)) {
             ackedMessages.put(t, new HashSet<>(Collections.singletonList(sender)));
+            beb.addMessage(t.getZ(), t.getX(), m.getVectorClock());
         } else {
             Set<ProcessDetails> set = ackedMessages.get(t);
             set.add(sender);
             ackedMessages.put(t, set);
-        }
-
-        if (!pendingMessages.contains(t)) {
-            m.setSender(sender);
-            lock.lock();
-            try {
-                pendingMessages.add(t);
-            } finally {
-                lock.unlock();
-            }
-            beb.addMessage(t.getZ(), t.getX(), m.getVectorClock());
         }
         checkToDeliver();
     }
