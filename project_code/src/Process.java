@@ -21,7 +21,7 @@ public class Process {
     private File logfile;
     private ProcessDetails sender;
     private BufferedWriter writer;
-    public final int TIMEOUT_TIME = 45;
+    public final int TIMEOUT_TIME = 35;
     public final int BUFFER_WRITER_SIZE = 1024 * 8;
 
     public Process(int processReceivePort, int id, ProcessDetails[] processesInNetwork, int numberOfMessages, HashSet<ProcessDetails> causality) throws Exception {
