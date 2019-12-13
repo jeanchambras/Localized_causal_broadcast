@@ -42,11 +42,11 @@ public class LCB implements Listener {
          * The 2.7 exponent has been determined, by a series of tests to guarantee reliability,
          * for a maximum of low machines specs
          *
-         * 1545 has been defined to have a window size of 20 with 5 processes
+         * 1002 has been defined to have a window size of 13 with 5 processes
          */
 
         this.sendingQueue = new ConcurrentLinkedQueue<>();
-        this.sendingQueueSize = Math.max(1, 1545 / (int) Math.pow(network.getNumberOfpeers(), 2.7));
+        this.sendingQueueSize = Math.max(1, 1002 / (int) Math.pow(network.getNumberOfpeers(), 2.7));
     }
 
     public void startToBroadcast() {
