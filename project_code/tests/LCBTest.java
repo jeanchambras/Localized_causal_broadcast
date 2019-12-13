@@ -9,6 +9,16 @@ public class LCBTest {
         return IntStream.range(0,v1.length).allMatch(i -> v1[i] <= v2[i]);
     }
 
+    public int window (int processessInNetwork){
+        return Math.max(1,1545/(int)Math.pow(processessInNetwork,2.7));
+    }
+
+    @Test
+    public void windowTests(){
+        assertEquals(window(80),1);
+        assertEquals(window(10),3);
+        assertEquals(window(5),20);
+    }
     @Test
     public void lessThanTests(){
         int[] a = new int[]{1,0,0,0,0,0,0};
