@@ -1,36 +1,31 @@
-import java.util.ArrayList;
-
-/**
- * NetworkTopology class defines the network topology, an array list of Process details.
+/*
+ * The NetworkTopology class defines the network topology, an array containing all informations about processes in
+ * the network.
  */
 
-
 public class NetworkTopology {
-    private ArrayList<ProcessDetails> processesInNetwork;
+    private ProcessDetails[] processesInNetwork;
+    private int numberOfpeers;
 
-    public NetworkTopology (ArrayList<ProcessDetails> processesInNetwork){
+    public NetworkTopology(ProcessDetails[] processesInNetwork) {
         this.processesInNetwork = processesInNetwork;
+        this.numberOfpeers = processesInNetwork.length;
     }
 
-    public ArrayList<ProcessDetails> getProcessesInNetwork() {
+    int getNumberOfpeers() {
+        return numberOfpeers;
+    }
+
+    ProcessDetails[] getProcessesInNetwork() {
         return processesInNetwork;
     }
 
-    public ProcessDetails getProcessFromPort(int port) throws Exception {
-        for (ProcessDetails p : processesInNetwork) {
-            if (p.getPort() == port) {
-                return p;
-            }
-        }
-        throw new Exception("Not valid port number");
-    }
-
-    public ProcessDetails getProcessFromId(int id) throws Exception {
+    ProcessDetails getProcessFromId(int id) throws IllegalArgumentException {
         for (ProcessDetails p : processesInNetwork) {
             if (p.getId() == id) {
                 return p;
             }
         }
-        throw new Exception("Not valid id");
+        throw new IllegalArgumentException("Not a valid id, the process " + id + " is not present in the network");
     }
 }

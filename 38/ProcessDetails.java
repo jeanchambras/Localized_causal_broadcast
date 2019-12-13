@@ -1,6 +1,4 @@
 import java.io.Serializable;
-import java.net.UnknownHostException;
-
 
 /**
  * The ProcessDetails class defines a process object through its ip address, its ip port and its id.
@@ -43,6 +41,6 @@ public class ProcessDetails implements Serializable {
 
     @Override
     public int hashCode() {
-        return port * (id + 7);
+        return port + id * 31;
     }
 }

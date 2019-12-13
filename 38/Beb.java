@@ -1,50 +1,48 @@
 import java.net.DatagramSocket;
 import java.util.ArrayList;
 
-
-
-/**
- * BEB class defines the BEB algorithm. Like every algorithm in the stack it has the sendMessages and deliver functions which corresponds to the Broadcast and Deliver functions of the algorithms.
- * The deliver function always calls the corresponding function above in the abstraction stack.
- *
- */
-
-
 public class Beb implements Listener {
     private PerfectLink perfectLink;
     private Listener urb;
     private NetworkTopology networkTopology;
-    private ProcessDetails sender;
-    public Beb(ProcessDetails sender, DatagramSocket socket, NetworkTopology network, int timeout, Listener urb) {
+    private ProcessDetails processDetails;
+
+    Beb(ProcessDetails processDetails, DatagramSocket socket, NetworkTopology network, int timeout, Listener urb) {
         this.perfectLink = new PerfectLink(network, socket, timeout, this);
         this.networkTopology = network;
         this.urb = urb;
-        this.sender = sender;
+        this.processDetails = processDetails;
     }
 
-    public void addMessage(ProcessDetails source, String payload) {
-        ArrayList<Message> messages = new ArrayList<>();
+    /*
+     * Create point to point messages to every processes in the network (including self), and send them to the perfect
+     * link abstraction
+     */
+
+    void bebBroadcast(ProcessDetails source, Integer payload, int[] vc) {
+        ArrayList<Message> pointToPointMessages = new ArrayList<>();
         for (ProcessDetails destination : networkTopology.getProcessesInNetwork()) {
-            Message m = new Message(destination, source, payload, sender);
-            messages.add(m);
+            Message pointToPointMessage = new Message(destination, source, payload, processDetails, vc);
+
+            /* If the destination process is self, we pass it to the delivering queue of perfect link to be handled by the
+             * application thread (the thread that handle received messages). Otherwise we pass the message to the
+             * sending thread.
+             */
+
+            if (pointToPointMessage.getDestination().equals(processDetails)) {
+                perfectLink.addToDeliver(pointToPointMessage);
+            } else {
+                pointToPointMessages.add(pointToPointMessage);
+            }
         }
-        perfectLink.addMessagesToQueue(messages);
-    }
-
-    public void sendMessages() {
-        perfectLink.sendMessages();
+        perfectLink.addMessagesToQueue(pointToPointMessages);
     }
 
     @Override
-    public void callback(Message m) {
-        deliver(m);
-    }
+    public void callback(Message perfectLinkDeliveredMessage) { deliver(perfectLinkDeliveredMessage); }
+
+    public void deliver(Message message) { urb.callback(message); }
 
     @Override
-    public void callback(Tuple t) {
-    }
-
-    public void deliver(Message m) {
-        urb.callback(m);
-    }
+    public void callback(Triple t) {}
 }
