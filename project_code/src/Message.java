@@ -1,29 +1,22 @@
-import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Vector;
 
-
-/**
- * The message class defines a message that is sent between different processes. It contains the field destination, source (original sender) and sender (the address of the process which forwarded the message).
- */
-
-public class Message implements Serializable {
+public class Message {
     private ProcessDetails destination;
     private ProcessDetails source;
-    private Integer payload;
+    private Integer messageID;
     private ProcessDetails sender;
     private int[] vectorClock;
 
-    public Message(ProcessDetails destination, ProcessDetails source, Integer payload, ProcessDetails sender, int[] vc) {
+    public Message(ProcessDetails destination, ProcessDetails source, Integer messageID, ProcessDetails sender, int[] vc) {
         this.destination = destination;
         this.source = source;
-        this.payload = payload;
+        this.messageID = messageID;
         this.sender = sender;
         this.vectorClock = vc;
     }
 
-    public Integer getPayload() {
-        return payload;
+    public Integer getMessageID() {
+        return messageID;
     }
 
     public ProcessDetails getDestination() {
@@ -48,21 +41,28 @@ public class Message implements Serializable {
 
     @Override
     public boolean equals(Object o) {
+
         if (o == this) {
             return true;
         }
         if (!(o instanceof Message)) {
             return false;
         }
+
         Message c = (Message) o;
-        return this.destination.equals(c.destination) && this.source.equals(c.source) && this.payload.equals(c.payload) && this.sender.equals(c.sender) && Arrays.equals(this.vectorClock, c.vectorClock);
+
+        return this.destination.equals(c.destination)
+                && this.source.equals(c.source)
+                && this.messageID.equals(c.messageID)
+                && this.sender.equals(c.sender)
+                && Arrays.equals(this.vectorClock, c.vectorClock);
     }
 
     @Override
     public int hashCode() {
         int hash = destination.hashCode();
         hash = 31 * hash + source.hashCode();
-        hash = 31 * hash + payload.hashCode();
+        hash = 31 * hash + messageID.hashCode();
         hash = 31 * hash + sender.hashCode();
         return 31 * hash + Arrays.hashCode(vectorClock);
     }

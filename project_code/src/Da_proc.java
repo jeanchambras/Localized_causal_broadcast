@@ -1,9 +1,6 @@
-import java.io.*;
-import java.util.*;
-
-/**
- * Da_proc is the main process, the application starts here. It reads the membership file and creates a new Process
- */
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.HashSet;
 
 public class Da_proc {
     public static void main(String[] args) {
@@ -14,24 +11,31 @@ public class Da_proc {
             System.exit(-1);
         }
 
-        // parse arguments
-        int processToLaunch = Integer.parseInt(args[0]);
+        // #################### parse command line arguments #########################
+
+        int ProcessToLaunchId = Integer.parseInt(args[0]);
         String membershipFilePath = args[1];
         int numberOfMessages = Integer.parseInt(args[2]);
-        // start to parse membership file
+
+        // ###################### parse membership file ##############################
+
         String line;
         try {
-            // open input stream membership file
-            BufferedReader br = new BufferedReader(new FileReader(membershipFilePath));
-            // Read the first line of the membership file
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(membershipFilePath));
+
             int numberOfProcesses = 0;
-            if ((line = br.readLine()) != null) {
+            if ((line = bufferedReader.readLine()) != null) {
                 numberOfProcesses = Integer.parseInt(line);
             }
 
+            /*
+             * Read the first n (number of processes in the membership file) lines, and create all the processes objects.
+             * Each process is described as a ProcessDetails object.
+             */
+
             ProcessDetails[] processesInNetwork = new ProcessDetails[numberOfProcesses];
             for (int i = 0; i < numberOfProcesses; ++i) {
-                line = br.readLine();
+                line = bufferedReader.readLine();
                 String[] process_details = line.split("\\s+");
 
                 int id = Integer.parseInt(process_details[0]);
@@ -41,31 +45,34 @@ public class Da_proc {
                 processesInNetwork[i] = new ProcessDetails(id, address, port);
             }
 
-            HashSet<ProcessDetails> causality = new HashSet<>();
+            /*
+             * Read the remaining n lines of the membership file. Get the set of localized processes for the
+             * ProcessToLaunchId.
+             */
+
+            HashSet<ProcessDetails> localized = new HashSet<>();
             for (int i = 1; i <= numberOfProcesses; ++i) {
-                line = br.readLine();
-                if (i == processToLaunch) {
+                line = bufferedReader.readLine();
+                if (i == ProcessToLaunchId) {
                     String[] causality_informations = line.split("\\s+");
-                    // The first element in the causality informations list is the id of the process
-                    // (not to include in the causality list as each process has a causal relationship with itself)
+
+                    /* The first element (0) in the causality_informations list is the id of the ProcessToLaunchId.
+                     * We do not to include in the localized set.
+                     */
+
                     for (int j = 1; j < causality_informations.length; ++j) {
-                        causality.add(processesInNetwork[Integer.parseInt(causality_informations[j]) - 1]);
+                        localized.add(processesInNetwork[Integer.parseInt(causality_informations[j]) - 1]);
                     }
                 }
             }
-            br.close();
-            ProcessDetails processToLaunchDetails = processesInNetwork[processToLaunch - 1];
-            new Process(processToLaunchDetails.getPort(), processToLaunch, processesInNetwork, numberOfMessages, causality);
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            bufferedReader.close();
+            ProcessDetails processToLaunch = processesInNetwork[ProcessToLaunchId - 1];
+            new Process(processToLaunch.getPort(), ProcessToLaunchId, processesInNetwork, numberOfMessages, localized);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 }
 

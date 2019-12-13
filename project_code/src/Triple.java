@@ -1,7 +1,6 @@
 import java.util.Arrays;
 
 public class Triple<X, Y, Z> {
-
     private final X x;
     private final int[] y;
     private final Z z;
@@ -34,14 +33,13 @@ public class Triple<X, Y, Z> {
             return false;
         }
         Triple c = (Triple) o;
-        return this.x.equals(c.getX()) && Arrays.equals(this.getY(), c.getY()) && this.z.equals(c.getZ());
+        return this.x.equals(c.getX())
+                && Arrays.equals(this.getY(), c.getY())
+                && this.z.equals(c.getZ());
     }
-
 
     @Override
     public int hashCode() {
         return 31 * (31 * x.hashCode() + (Arrays.hashCode(y))) + z.hashCode();
     }
-
-
 }
