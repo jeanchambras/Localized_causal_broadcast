@@ -1,6 +1,6 @@
 # da_project : Team 38
 
-Project of the distributed algorithms class
+Distributed algorithms EPFL
 
 ## Test for submission
 
